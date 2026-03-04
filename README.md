@@ -1,36 +1,44 @@
 # opencode-project-template
 
-A structured starting point for LLM-assisted software projects using
-[opencode](https://opencode.ai). It provides an orchestrator/subagent
-architecture, a knowledge base, an SRE first-responder pattern, and a global
-git operations agent — all wired together so an LLM can navigate and operate
-your project safely from the first session.
+A scaffold for adding LLM agent configuration to an **existing software
+project**. It wires an orchestrator/subagent architecture, a knowledge base,
+and a cross-system SRE observer into whatever project you already have —
+without touching your code, infrastructure, or runtime configuration.
+
+> **What this template is NOT:**
+> It does not create a new project. It does not define your application,
+> your deployment, or your runtime. It adds `.opencode/` agent files, a
+> few documentation stubs, and an `opencode.json` to a project that already
+> exists. All project-specific content (code, infra, config) is yours to
+> write. Machine-level configuration (global agents, MCP server installs,
+> opencode model settings) belongs in your nix config or
+> `~/.config/opencode/`, not here.
 
 ---
 
 ## For humans — quick start
 
-1. **Bootstrap a new project** (if you have the nix config deployed):
+1. **Add to an existing project** (if you have the nix config deployed):
    ```sh
-   cd ~/repos/my-new-project
+   cd ~/repos/my-existing-project
    opencode   # then run /opencode-init inside the session
    ```
-   The `opencode-init` command pulls the latest template and adapts all
-   placeholders to your project automatically.
+   The `opencode-init` command copies `template/` files from the latest
+   template and fills in the placeholders for your project.
 
 2. **Or copy manually:**
    ```sh
-   git clone https://github.com/Tokugero/opencode-project-template.git ~/.opencode-template
-   cp -r ~/.opencode-template/. ~/repos/my-new-project/
-   rm -rf ~/repos/my-new-project/.git
+   git clone https://github.com/Tokugero/opencode-project-template.git /tmp/opencode-template
+   cp -r /tmp/opencode-template/template/. ~/repos/my-existing-project/
    ```
    Then open the project in opencode and ask it to fill in the placeholders.
 
 3. **Install the global git agent once per machine** — see
    [`global-config/agents/README.md`](global-config/agents/README.md).
+   This is a one-time machine setup, not a per-project step.
 
-4. **Pin your template version** — after bootstrapping, note the value in
-   `.template-version`. Use `CHANGELOG.md` to diff and upgrade later.
+4. **Pin your template version** — after bootstrapping, create `.template-local`
+   (gitignored) in the project root with the version from `.template-version`.
 
 ---
 
@@ -38,39 +46,43 @@ your project safely from the first session.
 
 ```
 opencode-project-template/
-├── README.md                   ← this file
-├── AGENTS.md                   ← orchestrator dispatch table (copy → project)
-├── SUMMARY.md                  ← subsystem SUMMARY template (copy per subsystem)
-├── CHANGELOG.md                ← template version history
-├── .template-version           ← current template semver
-├── opencode.json               ← MCP server config stub (copy → project)
-├── .gitignore                  ← ignores in-progress.md and decrypted secrets
-├── .opencode/
-│   └── agents/
-│       ├── project-sre.md      ← SRE first-responder agent template
-│       └── project-role.md     ← general subagent template
-├── global-config/
-│   ├── README.md               ← global vs project-scoped agent explainer
+├── README.md                   ← this file (template repo only — do not copy)
+├── CHANGELOG.md                ← template version history (template repo only)
+├── .template-version           ← current template semver (template repo only)
+├── .gitignore                  ← ignores for the template repo itself
+├── global-config/              ← machine-scoped config (deploy once, never copy to projects)
 │   └── agents/
 │       ├── README.md           ← install instructions + nix wiring
-│       └── git-flow.md         ← global git operations agent (deploy once)
-├── kb/
-│   └── README.md               ← knowledge base index stub
-└── docs/
-    └── sre-todos.md            ← deferred SRE findings stub
+│       └── git-flow.md         ← global git operations agent
+└── template/                   ← COPY THIS into your project (like src/)
+    ├── AGENTS.md               ← orchestrator dispatch table
+    ├── SUMMARY.md              ← subsystem SUMMARY stub (one copy per subsystem)
+    ├── opencode.json           ← MCP config + default_agent stub
+    ├── .opencode/
+    │   └── agents/
+    │       ├── project-orchestrator.md ← primary orchestrator agent template
+    │       ├── project-sre.md          ← cross-system SRE observer template
+    │       └── project-role.md         ← general subagent template
+    ├── kb/
+    │   └── README.md           ← knowledge base index stub
+    └── docs/
+        └── sre-todos.md        ← deferred SRE findings stub
 ```
+
+The `template/` directory is the deliverable. Everything outside it is
+template-repo infrastructure (docs, versioning, machine-scoped config).
 
 ---
 
 ## Template version and upgrades
 
 This repo is versioned with semver. Consuming projects pin the version in
-`.template-version`. To upgrade:
+`.template-local` (gitignored, machine-specific). To upgrade:
 
-1. Check your project's `.template-version`.
+1. Check your project's `.template-local` for `template-version`.
 2. Read `CHANGELOG.md` entries between that version and the target.
 3. Apply the **Added** / **Changed** / **Removed** items to your project files.
-4. Update `.template-version` and add a row to your `AGENTS.md` Session Log.
+4. Update `template-version` in `.template-local` and add a row to your `AGENTS.md` Session Log.
 
 ---
 
@@ -78,17 +90,18 @@ This repo is versioned with semver. Consuming projects pin the version in
 
 | File / dir | Copy to project? | Purpose |
 |-----------|-----------------|---------|
-| `AGENTS.md` | Yes — customise | Orchestrator dispatch table. The LLM reads this every session to understand the project structure and which agent handles what. |
-| `SUMMARY.md` | Yes — one per subsystem | Subsystem context for subagents. Each major directory in your project should have one. |
-| `opencode.json` | Yes — customise | MCP server config. Add your project's MCP servers here. |
-| `.gitignore` | Yes — append to yours | Ignores `in-progress.md` files and decrypted secret artefacts. |
-| `.opencode/agents/project-sre.md` | Yes — rename + customise | SRE first-responder agent. Read-only; queries logs and health endpoints; does not make changes. |
-| `.opencode/agents/project-role.md` | Yes — one per subsystem agent | General subagent template. Owns one subsystem directory; maintains `function_signature.md`; ask-first protocol. |
-| `global-config/agents/git-flow.md` | No — deploy to `~/.config/opencode/agents/` | Global git operations agent. Install once per machine, not per project. |
-| `kb/README.md` | Yes | Knowledge base index. Agents append SOPs here after non-trivial tasks. |
-| `docs/sre-todos.md` | Yes | Deferred SRE findings. The SRE agent appends here; you resolve them. |
+| `template/AGENTS.md` | Yes — customise | Orchestrator dispatch table. The LLM reads this every session to understand the project structure and which agent handles what. |
+| `template/SUMMARY.md` | Yes — one per subsystem | Subsystem context for subagents. Each major directory in your project should have one. |
+| `template/opencode.json` | Yes — customise | MCP server config + `default_agent`. Set `default_agent` to match your orchestrator filename (without `.md`). |
+| `template/.opencode/agents/project-orchestrator.md` | Yes — rename + customise | Primary orchestrator agent (`mode: primary`). Wired as `default_agent`. Delegates all work to subagents; never edits files itself. |
+| `template/.opencode/agents/project-sre.md` | Yes — rename + customise | Cross-system SRE observer. Reads all subsystem docs, correlates across them, reports findings. Does not make changes. Grows in capability as subsystems are documented. |
+| `template/.opencode/agents/project-role.md` | Yes — one per subsystem agent | General subagent template. Owns one subsystem directory; maintains `function_signature.md`; ask-first protocol. |
+| `template/kb/README.md` | Yes | Knowledge base index. Agents append SOPs here after non-trivial tasks. |
+| `template/docs/sre-todos.md` | Yes | Deferred SRE findings. The SRE agent appends here; you resolve them. |
+| `global-config/agents/git-flow.md` | **No — never copy into a project.** Deploy to `~/.config/opencode/agents/` once per machine. | Global git operations agent. Machine-scoped, not project-scoped. Copying it into a project creates a stale duplicate and defeats the purpose of a global agent. |
 | `CHANGELOG.md` | No | Template version history. Keep in the template repo only. |
-| `.template-version` | Yes | Records which template version the project was initialised from. |
+| `.template-version` | No | Records the template's own semver. Use `.template-local` (gitignored) in consuming projects instead. |
+| `README.md` | No | This file. The project should have its own README. |
 
 ---
 
@@ -98,9 +111,10 @@ This repo is versioned with semver. Consuming projects pin the version in
 Human
   │
   ▼
-Orchestrator  (reads AGENTS.md every session)
+Orchestrator  (mode: primary — set as default_agent in opencode.json)
+  │  reads AGENTS.md every session
   │
-  ├── @<project>-sre      first stop for any runtime problem; read-only
+  ├── @<project>-sre      cross-system observer; read-only; grows with the project
   ├── @<project>-<role>   owns one subsystem directory
   ├── @<project>-<role>   owns another subsystem directory
   └── @git-flow           global; handles all git operations across all projects
@@ -108,15 +122,22 @@ Orchestrator  (reads AGENTS.md every session)
 
 ### Orchestrator
 
-The orchestrator is the LLM you talk to directly. It reads `AGENTS.md`,
-identifies which subagent should act, and delegates. It **never** edits files
-or runs git commands itself — those are always routed to a subagent.
+The orchestrator (`mode: primary`) is the LLM you talk to directly. It is set
+as `default_agent` in `opencode.json` so every session starts with it active.
+It reads `AGENTS.md`, identifies which subagent should act, and delegates. It
+**never** edits files or runs git commands itself — those are always routed to
+a subagent. The `edit` and `write` tools are disabled in its frontmatter to
+enforce this.
 
 ### SRE agent
 
-First responder for any running-system problem. It reads logs, queries health
-endpoints, and reports findings. It does **not** make changes. The orchestrator
-invokes it before touching any code or config for a runtime issue.
+The SRE agent is a cross-system observer. It reads every subsystem's
+`SUMMARY.md` and `function_signature.md` to build a full picture of the
+system, then queries live state to find what is actually happening. It
+correlates across subsystems (a symptom in one often has its root cause in
+another), recommends fixes, and does **not** make changes. As the project
+gains more subsystems with better documentation, the SRE agent's diagnostic
+capability grows automatically.
 
 ### Role agents
 
@@ -137,45 +158,59 @@ Two-phase push: always summarises the proposed push and waits for explicit
 human confirmation before executing `git push`.
 
 ---
-
 ## LLM setup instructions
 
-> **This section is for the LLM initialising a new project from this template.**
-> If you are an agent running `opencode-init` or adapting this template, read
-> every word of this section before touching any file.
+> **This section is for the LLM adding agent scaffolding to an existing project.**
+> If you are an agent running `opencode-init` or applying this template manually,
+> read every word of this section before touching any file.
+>
+> **You are NOT creating a new project.** The project already exists. Your job
+> is to add opencode agent configuration to it. Do not create application code,
+> infrastructure definitions, deployment configs, or runtime setup. Do not copy
+> machine-level config (`global-config/`) into the project. Only the files
+> inside `template/` belong in the destination project.
 
 ### Step 0 — understand before acting
 
 Before creating or modifying anything:
 
-1. Read `AGENTS.md` in the template to understand the orchestrator pattern.
-2. Read `.opencode/agents/project-role.md` to understand the subagent contract.
-3. Read `.opencode/agents/project-sre.md` to understand the SRE pattern.
-4. Examine the target project directory — directory names, existing code,
-   `package.json` / `go.mod` / `Makefile` / `flake.nix`, README if any.
-5. Infer: project name, language/stack, major subsystems, likely agent roles.
+1. Read `template/AGENTS.md` to understand the orchestrator pattern.
+2. Read `template/.opencode/agents/project-orchestrator.md` — primary agent contract.
+3. Read `template/.opencode/agents/project-role.md` — subagent contract.
+4. Read `template/.opencode/agents/project-sre.md` — SRE observer pattern.
+5. Examine the **destination** project directory — directory names, existing
+   code, `package.json` / `go.mod` / `Makefile` / `flake.nix`, README if any.
+6. Infer: project name, language/stack, major subsystems, likely agent roles.
 
 Do **not** start writing files until you have answered:
 - What is the project name? (use the directory name if unclear)
 - What are the 2–4 major subsystems or concerns? (e.g. `api`, `frontend`, `infra`)
-- What runtime does the SRE agent need to query? (endpoints, log commands)
 - What secrets manager is in use, if any?
 
 ### Step 1 — files to copy verbatim (no placeholder substitution)
 
-Copy these files as-is into the project root:
+Copy these files from `template/` into the project root as-is:
 
-- `.gitignore` — append to any existing `.gitignore`, do not overwrite
-- `kb/README.md`
-- `docs/sre-todos.md`
-- `CHANGELOG.md` — only if no existing changelog; otherwise skip
-- `.template-version`
+- `template/kb/README.md` → `kb/README.md`
+- `template/docs/sre-todos.md` → `docs/sre-todos.md`
+
+Also append `template/` entries from the template `.gitignore` to any existing
+`.gitignore` in the project — do not overwrite.
+
+Then create `.template-local` (gitignored, machine-specific) in the project root:
+
+```yaml
+template-version: <value from .template-version in this template repo>
+template-path: /absolute/path/to/opencode-project-template
+```
+
+Do **not** copy `.template-version` itself — `.template-local` replaces it.
 
 ### Step 2 — files to copy and customise
 
-For each file below, copy it and substitute every `<placeholder>`:
+For each file below, copy from `template/` and substitute every `<placeholder>`:
 
-#### `AGENTS.md`
+#### `template/AGENTS.md` → `AGENTS.md`
 
 | Placeholder | Replace with |
 |------------|-------------|
@@ -190,7 +225,7 @@ For each file below, copy it and substitute every `<placeholder>`:
 | Code Style Guidelines | adapt to the project's language and conventions |
 | Session Log first entry | today's date and "Initial setup (v`<version>`)" |
 
-#### `SUMMARY.md` — one copy per subsystem directory
+#### `template/SUMMARY.md` — one copy per subsystem directory
 
 Create `<subsystem>/SUMMARY.md` for each major subsystem:
 
@@ -203,33 +238,49 @@ Create `<subsystem>/SUMMARY.md` for each major subsystem:
 | Dev workflow commands | real commands for this subsystem |
 | Non-negotiables | project-specific rules |
 
-#### `opencode.json`
+#### `template/opencode.json` → `opencode.json`
 
+Set `default_agent` to match your orchestrator filename (without `.md`).
 Remove the `REPLACE_ME` MCP stub or replace it with real MCP servers.
-If no MCP servers are needed yet, use:
+If no MCP servers are needed yet:
 ```json
-{ "$schema": "https://opencode.ai/config.json" }
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "orchestrator"
+}
 ```
 
-#### `.opencode/agents/project-sre.md`
+#### `template/.opencode/agents/project-orchestrator.md` → `.opencode/agents/<project>-orchestrator.md`
+
+| Placeholder | Replace with |
+|------------|-------------|
+| frontmatter `description` | actual project name and scope |
+| `<project>` in agent names throughout | short project slug |
+| Decision tree items 2+ | one rule per subsystem mapping to its agent |
+| Subagents table rows | actual subagent names and scope descriptions |
+| `@<project>-sre` references | e.g. `@myapp-sre` |
+| Root config files list | actual root config files for this project |
+
+#### `template/.opencode/agents/project-sre.md` → `.opencode/agents/<project>-sre.md`
 
 | Placeholder | Replace with |
 |------------|-------------|
 | `<project>` in frontmatter description | project slug |
 | `<project>` in agent name heading | project slug |
-| Delegation table | actual subsystem agents for this project |
-| "How to investigate" section | real log commands, health endpoints, metrics tools |
 
-#### `.opencode/agents/project-role.md` — one copy per subsystem agent
+No baked investigation steps needed. The SRE agent discovers how to
+investigate by reading each subsystem's `SUMMARY.md` and
+`function_signature.md` at runtime. Its capability grows as those docs grow.
 
-Rename to `<project>-<role>.md` (e.g. `myapp-api.md`):
+#### `template/.opencode/agents/project-role.md` → `.opencode/agents/<project>-<role>.md`
+
+One copy per subsystem agent. Rename to `<project>-<role>.md` (e.g. `myapp-api.md`):
 
 | Placeholder | Replace with |
 |------------|-------------|
 | frontmatter `description` | actual description of this agent's scope |
 | `<project>-<role> agent` heading | e.g. `myapp-api agent` |
 | `<subsystem>/` in scope table | actual directory this agent owns |
-| Delegation table rows | real subsystem-to-agent mappings |
 | `@<project>-sre` references | e.g. `@myapp-sre` |
 
 ### Step 3 — create `function_signature.md` stubs
@@ -249,29 +300,34 @@ _Last updated: YYYY-MM-DD_
 <!-- The <project>-<role> agent will populate this as it works. -->
 ```
 
-The role agent will fill this in as it explores the subsystem. Do not attempt
-to populate it yourself unless you have already read all the files in the
-directory.
+The role agent fills this in as it explores the subsystem. Do not attempt
+to populate it yourself unless you have already read all the files.
 
 ### Step 4 — do NOT copy
 
-These files stay in the template repo only:
+These items must never be copied into the destination project:
 
-- `global-config/` — deploy these once per machine, not per project
-- `CHANGELOG.md` of the template — the project gets its own changelog
-- `README.md` (this file) — the project should have its own README
+- `global-config/` — **NEVER copy this into a project.** It is machine-scoped.
+  The `git-flow.md` agent inside it is deployed once to
+  `~/.config/opencode/agents/` (or via nix config) and shared across all
+  projects on the machine. Copying it into a project repo creates a stale
+  duplicate and defeats the purpose of a global agent.
+- `CHANGELOG.md` — template version history, stays in the template repo
+- `README.md` (this file) — stays in the template repo
+- `.template-version` — use `.template-local` (gitignored) in the project instead
 
 ### Step 5 — verify before finishing
 
 After all files are written, confirm:
 
-- [ ] Every `<placeholder>` has been replaced — run a search for `<` in all
-      copied files and resolve any remaining angle-bracket tokens
+- [ ] Every `<placeholder>` replaced — search for `<` in all copied files
 - [ ] `AGENTS.md` roster table matches the actual `.opencode/agents/` files
-- [ ] `opencode.json` has no `REPLACE_ME` stubs
-- [ ] `.template-version` contains the correct version from this template
+- [ ] `opencode.json` has `default_agent` set and no `REPLACE_ME` stubs
+- [ ] `default_agent` value matches the orchestrator filename (without `.md`)
+- [ ] `.template-local` exists with the correct version and path
 - [ ] Session Log in `AGENTS.md` has today's date
-- [ ] `global-config/` was NOT copied into the project
+- [ ] `global-config/` was NOT copied into the project — if it was, remove it immediately
+- [ ] No application code, infra config, or runtime setup was created by this process
 
 Report to the human:
 1. Which files were created
@@ -279,4 +335,3 @@ Report to the human:
 3. Whether `global-config/agents/git-flow.md` is already deployed on this
    machine (`ls ~/.config/opencode/agents/git-flow.md`) — if not, print the
    install instructions from `global-config/agents/README.md`
-

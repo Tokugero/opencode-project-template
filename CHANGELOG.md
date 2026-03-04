@@ -4,9 +4,105 @@ All notable changes to this template are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-When a project adopts this template it pins its version in `.template-version`.
-To upgrade, diff against the desired version tag and apply changes manually or
-with the help of the orchestrator agent.
+When a project adopts this template it pins its version in `.template-local`
+(gitignored, machine-specific). To upgrade, diff against the desired version
+tag and apply changes manually or with the help of the orchestrator agent.
+
+---
+
+## [0.8.0] — 2026-03-04
+
+### Added
+- `template/` subdirectory: all files intended to be copied into a consuming
+  project are now inside `template/`. Everything outside it is template-repo
+  infrastructure (README, CHANGELOG, versioning, global-config). This makes
+  the boundary between "copy this" and "do not copy this" unambiguous for a
+  naive LLM.
+
+### Changed
+- `README.md` intro: explicit statement that this template adds agent
+  scaffolding to an **existing** project and does not create application code,
+  infra config, or runtime setup. Includes a bold "What this template is NOT"
+  callout.
+- `README.md` quick-start: instructions updated to copy from `template/`
+  subdirectory, not the repo root.
+- `README.md` repository layout: tree updated to show `template/` as the
+  deliverable and everything outside it as template-repo infrastructure.
+- `README.md` "What each file is for" table: all paths now prefixed with
+  `template/`; `global-config/` row clarified with **NEVER copy** wording.
+- `README.md` LLM setup instructions: Step 0 reframed — "you are NOT creating
+  a new project"; all copy steps now reference `template/` source paths; SRE
+  step notes that no baked investigation steps are needed; Step 4 "do NOT
+  copy" list tightened; Step 5 checklist adds "no application code was
+  created by this process".
+- `template/.opencode/agents/project-sre.md`: rewritten as a cross-system
+  observer rather than a baked first-responder. The agent now reads all
+  subsystem `SUMMARY.md` and `function_signature.md` files to build a system
+  model, then correlates across subsystems to diagnose problems. No
+  hardcoded investigation steps — capability grows as subsystem docs grow.
+- `template/AGENTS.md`: `global-config/` block removed from the repository
+  structure tree (it is not project-scoped).
+
+### Removed
+- All top-level copyable files (`AGENTS.md`, `SUMMARY.md`, `opencode.json`,
+  `.opencode/agents/`, `kb/`, `docs/`) moved into `template/`. They no longer
+  exist at the repo root.
+
+---
+
+## [0.7.0] — 2026-03-04
+
+### Added
+- `.opencode/agents/project-orchestrator.md` — primary orchestrator agent
+  template (`mode: primary`). Delegates all work to subagents; never edits
+  files directly (`edit`/`write` tools disabled). Contains: decision tree for
+  routing tasks to the right subagent, subagents table, session-start three-
+  step check (interrupted tasks + SRE deferred issues + template sync), and
+  permission gates. The write/edit tools are disabled in frontmatter.
+- `default_agent` field in `opencode.json` stub, set to `"orchestrator"`.
+  Projects rename their orchestrator file accordingly and match the value.
+- Orchestrator row added to the Subagent Roster table in `AGENTS.md`, with a
+  note explaining `default_agent` and the filename-to-value convention.
+- Orchestrator entry added to the repository structure tree in `AGENTS.md`
+  and `README.md`.
+- `project-orchestrator.md` row added to the What each file is for table in
+  `README.md` with copy/rename instructions.
+- Step 0 in LLM setup instructions updated to read `project-orchestrator.md`
+  before acting.
+- Step 2 in LLM setup instructions: `opencode.json` section expanded with
+  `default_agent` guidance and placeholder substitution table for
+  `project-orchestrator.md`.
+- Step 4 (do NOT copy) and Step 5 (verify) updated for the orchestrator.
+
+### Changed
+- `README.md` Agent architecture section: orchestrator description expanded to
+  explain `mode: primary`, `default_agent`, and the disabled edit/write tools.
+
+---
+
+## [0.6.0] — 2026-03-04
+
+### Added
+- `.template-local` concept: a gitignored, machine-specific file that each
+  consuming project creates once per checkout. Contains `template-version`
+  (the currently-synced version) and `template-path` (absolute local path to
+  the template repo). Documented with format and instructions in `AGENTS.md`.
+- `Helpful Commands` section in `AGENTS.md` with the syncing workflow
+  (5-step procedure) and `.template-local` format specification.
+- `.template-local` entry added to `.gitignore`.
+- Session-start **template sync check** in `AGENTS.md`: orchestrator reads
+  `.template-local`, compares against `CHANGELOG.md` in `template-path`, and
+  asks the human before syncing if the template has advanced.
+- `Helpful Commands` entry added to the Table of Contents.
+
+### Changed
+- `AGENTS.md`: repository structure tree updated to include `.template-local`.
+- `AGENTS.md`: `Session start` section renamed to
+  "check for interrupted tasks and template updates" and expanded with the
+  template sync check procedure.
+- `.template-version` replaced by `.template-local` as the canonical
+  version-tracking mechanism (`.template-local` includes both version and path,
+  and is gitignored so it is machine-specific).
 
 ---
 

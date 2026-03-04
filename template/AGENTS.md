@@ -29,20 +29,16 @@ coordination is needed.
 
 ```
 <project>/
-├── opencode.json               ← MCP server config
+├── opencode.json               ← MCP server config + default_agent
 ├── AGENTS.md                   ← THIS FILE — orchestration dispatch table
 ├── CHANGELOG.md                ← template version history
-├── .template-version           ← pinned template semver (e.g. 1.0.0)
+├── .template-local             ← gitignored: local template-version + template-path
 ├── .opencode/
 │   └── agents/                 ← project-scoped subagent definitions
+│       ├── <project>-orchestrator.md ← primary orchestrator (mode: primary)
 │       ├── <project>-sre.md    ← read-only runtime investigation
 │       ├── <project>-<role>.md ← per-subsystem agents
 │       └── ...
-├── global-config/              ← user-level config to deploy ONCE per machine
-│   ├── README.md               ← explains global vs project-scoped agents
-│   └── agents/
-│       ├── README.md           ← per-agent install instructions + nix wiring
-│       └── git-flow.md         ← global git operations agent
 ├── kb/                         ← knowledge base: SOPs and runbooks
 │   └── README.md               ← KB index table
 ├── docs/
@@ -71,9 +67,22 @@ coordination is needed.
 
 | Subagent | Agent file | Scope | When to invoke |
 |----------|-----------|-------|---------------|
+| **<project>-orchestrator** | `.opencode/agents/<project>-orchestrator.md` | Primary agent — delegates all work | Always active (set as `default_agent` in `opencode.json`) |
 | **<project>-sre** | `.opencode/agents/<project>-sre.md` | Read-only runtime investigation | Crashes, failures, metrics questions, resource pressure |
 | **<project>-<role>** | `.opencode/agents/<project>-<role>.md` | <description> | <trigger> |
 | **git-flow** | (global agent) | Git operations | Commits, branches, PRs, git history queries |
+
+### Orchestrator — primary agent
+
+The orchestrator is set as `default_agent` in `opencode.json` (`mode: primary`).
+Every session starts with it active. It reads this file, routes each task to the
+correct subagent, and **never edits files or runs git commands directly**.
+
+`opencode.json` must contain:
+```json
+{ "default_agent": "<project>-orchestrator" }
+```
+The value must match the agent filename without `.md`.
 
 ### SRE agent — first responder for all runtime issues
 
@@ -113,15 +122,32 @@ by resuming the same task session — do not fall back to running git yourself.
 6. Cross-cutting changes are coordinated by the top-level agent, delegating to
    each subagent in sequence.
 
-### Session start — check for interrupted tasks first
+### Session start — check for interrupted tasks and template updates
 
-Before doing anything else, scan for in-progress subagent work:
+Before doing anything else at the start of a session, run these two checks:
+
+**1. Interrupted tasks:**
 
 ```bash
 find . -name "in-progress.md" -not -path "./.git/*" 2>/dev/null
 ```
 
 If any files are found, read each one and surface a resume prompt to the human.
+
+**2. Template sync check:**
+
+```bash
+cat .template-local 2>/dev/null
+```
+
+If `.template-local` exists, read it and compare `template-version` against
+the `CHANGELOG.md` in `template-path`. If the template has a newer version,
+present a summary of what changed (from the CHANGELOG) and ask:
+
+> "The opencode-project-template has been updated from vX to vY. Would you like to sync this project now?"
+
+Only proceed with the sync if the human says yes. The sync process is described
+in the Helpful Commands section below.
 
 ---
 
@@ -157,6 +183,31 @@ If any files are found, read each one and surface a resume prompt to the human.
 3. Running destructive commands (`delete`, `drop`, `reset`, `purge`).
 4. Any action affecting more than one node/instance simultaneously.
 5. Deleting git history or running `git push --force`.
+
+---
+
+## Helpful Commands
+
+```sh
+# Syncing from the template
+# 1. Read .template-local to get template-path and current template-version
+# 2. Read CHANGELOG.md in template-path to identify changes since template-version
+# 3. Apply each Added/Changed/Removed item to the relevant files in this project
+# 4. Update template-version in .template-local to the new version
+# 5. Add a row to the Session Log below
+```
+
+### .template-local format
+
+This file is gitignored and machine-specific. Create it once per checkout:
+
+```yaml
+template-version: <semver matching .template-version in the template repo>
+template-path: /absolute/path/to/opencode-project-template
+```
+
+The orchestrator reads this file at session start to detect when the template
+has advanced beyond the pinned version and prompts the human to sync.
 
 ---
 

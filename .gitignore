@@ -4,3 +4,6 @@
 # Transient subagent state — never committed
 **/in-progress.md
 **/kb/in-progress.md
+
+# Local template tracking — machine-specific, never committed
+.template-local
