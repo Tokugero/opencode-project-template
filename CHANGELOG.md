@@ -10,6 +10,18 @@ with the help of the orchestrator agent.
 
 ---
 
+## [0.5.0] — 2026-03-03
+
+### Added
+- `README.md` — dual-audience documentation: human quick-start (bootstrap,
+  manual copy, version pinning) and full LLM setup instructions (5-step
+  process: read first, copy verbatim, copy and customise, stub
+  `function_signature.md`, verify). Includes repo layout, file-by-file
+  copy/skip table, placeholder substitution tables for every template file,
+  and agent architecture diagram.
+
+---
+
 ## [0.4.0] — 2026-03-03
 
 ### Added
