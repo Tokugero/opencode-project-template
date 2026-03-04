@@ -10,6 +10,23 @@ with the help of the orchestrator agent.
 
 ---
 
+## [0.4.0] — 2026-03-03
+
+### Added
+- `global-config/` directory for user-level (non-project) opencode config.
+- `global-config/README.md` — explains the distinction between global and
+  project-scoped agents and how to deploy global agents manually or via nix.
+- `global-config/agents/README.md` — per-agent installation instructions,
+  permission table, and nix home-manager wiring snippet.
+- `global-config/agents/git-flow.md` — the canonical global git flow agent:
+  conventional commits, two-phase push protocol, hard deny on force-push to
+  main, `gh` PR support.
+
+### Changed
+- `AGENTS.md`: repository structure tree updated to include `global-config/`.
+
+---
+
 ## [0.3.0] — 2026-03-03
 
 ### Added

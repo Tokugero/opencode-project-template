@@ -34,10 +34,15 @@ coordination is needed.
 ├── CHANGELOG.md                ← template version history
 ├── .template-version           ← pinned template semver (e.g. 1.0.0)
 ├── .opencode/
-│   └── agents/                 ← subagent definitions
+│   └── agents/                 ← project-scoped subagent definitions
 │       ├── <project>-sre.md    ← read-only runtime investigation
 │       ├── <project>-<role>.md ← per-subsystem agents
 │       └── ...
+├── global-config/              ← user-level config to deploy ONCE per machine
+│   ├── README.md               ← explains global vs project-scoped agents
+│   └── agents/
+│       ├── README.md           ← per-agent install instructions + nix wiring
+│       └── git-flow.md         ← global git operations agent
 ├── kb/                         ← knowledge base: SOPs and runbooks
 │   └── README.md               ← KB index table
 ├── docs/
