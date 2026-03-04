@@ -1,0 +1,6 @@
+**/.decrypted~*
+**/*\.dec\.*
+
+# Transient subagent state — never committed
+**/in-progress.md
+**/kb/in-progress.md
