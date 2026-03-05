@@ -1,27 +1,33 @@
-# <subsystem> — SUMMARY.md
+# SUMMARY.md — <project-name>
 
-Subagent working in this subsystem: read this file and `function_signature.md`
-before starting any task.
-
-## What this subsystem is
-
-<!-- One paragraph: what this subsystem does, why it exists, who uses it -->
+**Read this file first.** It gives any agent enough context to orient in the
+project without reading all source files. Subsystems each have their own
+`<subsystem>/SUMMARY.md` for deeper detail.
 
 ---
 
-## function_signature.md
+## What this project is
 
-`function_signature.md` in this directory is the authoritative map of every
-file and component in this subsystem. Consult it to find where a thing lives
-before reading source files. The owning subagent keeps it current.
+<!-- One paragraph: what this project does, why it exists, who uses it -->
 
 ---
 
-## Component table
+## Repository map
 
-| Component | Path | Role |
+| Subsystem | Path | Role |
 |-----------|------|------|
-| <!-- fill in --> | `<subsystem>/...` | ... |
+| <!-- fill in --> | `<subsystem>/` | ... |
+
+---
+
+## Subagent quick-reference
+
+| Task type | First agent to invoke |
+|-----------|----------------------|
+| Runtime error / crash / metrics | `@<project>-sre` |
+| Infra / env / secrets / CI | `@<project>-devops` |
+| <subsystem> code or behaviour | `@<project>-<role>` |
+| Git operations | `@git-flow` |
 
 ---
 
@@ -33,18 +39,24 @@ before reading source files. The owning subagent keeps it current.
 
 ---
 
+## Stack at a glance
+
+| Layer | Technology |
+|-------|-----------|
+| <!-- fill in --> | ... |
+
+---
+
 ## Dev workflow
 
 ```sh
-# <!-- fill in common dev commands -->
-# Example:
 # Run tests
 # <command>
 
-# Apply a change
+# Start local stack
 # <command>
 
-# Restart a service
+# Apply a change
 # <command>
 ```
 
@@ -52,12 +64,23 @@ before reading source files. The owning subagent keeps it current.
 
 ## Storage / persistence
 
-<!-- Describe any persistent state: databases, PVCs, files, caches -->
+<!-- Describe any persistent state: databases, volumes, files, caches -->
 
 ---
 
 ## Non-negotiables
 
-<!-- Project-specific rules that must always hold in this subsystem -->
+<!-- Project-wide rules that must always hold -->
 - Never commit unencrypted secrets
 - Never use floating/latest versions
+
+---
+
+## Subsystem SUMMARY.md files
+
+Each subsystem has its own `SUMMARY.md` with deeper detail. Read the
+relevant one before working inside that subsystem:
+
+| Subsystem | File |
+|-----------|------|
+| <!-- fill in --> | `<subsystem>/SUMMARY.md` |

@@ -10,6 +10,36 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [0.9.0] — 2026-03-04
+
+### Added
+- `template/protocols.md` — extracted from `AGENTS.md`: secrets protocol,
+  code style guidelines, permission gates, and helpful commands (including
+  the `.template-local` format and template sync procedure). Keeps the
+  AGENTS.md system prompt lean by moving stable reference material out of
+  the injected context.
+- `template/docs/session-log.md` — extracted from `AGENTS.md`: historical
+  session log table. Prevents the system prompt from growing unboundedly
+  with per-session history entries. AGENTS.md now references this file
+  rather than inlining the log.
+- `template/SUMMARY.md` promoted to a **project-root-level** orientation
+  file (previously it was subsystem-scoped only). The root SUMMARY.md gives
+  any agent enough context to orient in the full project — repository map,
+  subagent quick-reference, stack at a glance, service endpoints, dev
+  workflow, and pointers to per-subsystem SUMMARY.md files.
+
+### Changed
+- `template/AGENTS.md`: Secrets Protocol, Code Style Guidelines, Permission
+  Gates, Helpful Commands, and Session Log sections removed. Each is now
+  referenced by pointer (`protocols.md` or `docs/session-log.md`). File
+  reduced from ~219 lines to ~147 lines. Added `SUMMARY.md` and
+  `protocols.md` to the repository structure tree.
+- `template/AGENTS.md`: Session start section updated — SRE deferred issues
+  check added as step 2 (was missing from template). Template sync check
+  now references `protocols.md` for the sync procedure rather than inlining it.
+
+---
+
 ## [0.8.0] — 2026-03-04
 
 ### Added
