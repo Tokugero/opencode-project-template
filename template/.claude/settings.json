@@ -1,0 +1,25 @@
+{
+  "model": "claude-opus-4-6",
+  "mcpServers": {
+    "REPLACE_ME": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "REPLACE_WITH_MCP_SERVER"]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(find *)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "WebFetch(*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)"
+    ]
+  }
+}
