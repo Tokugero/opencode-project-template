@@ -10,6 +10,47 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.1.0] — 2026-03-07
+
+### Added
+- `template/CLAUDE.md` — Claude Code orchestrator + dispatch table. Merges the
+  primary agent pattern and `AGENTS.md` into a single file; main session is the
+  orchestrator (no `default_agent` indirection).
+- `template/.claude/settings.json` — Claude Code project settings stub with
+  session model (`claude-opus-4-6`), MCP placeholder, and permission defaults.
+- `template/.claude/agents/project-sre.md` — Claude Code SRE subagent. No
+  explicit model (sonnet default); `disallowedTools: [Edit, Write]`.
+- `template/.claude/agents/project-role.md` — Claude Code role subagent. No
+  explicit model (sonnet default); full ask-first and interruption-recovery
+  protocols.
+- `template/.claude/skills/example-skill/` — Canonical skill pattern template
+  with supporting-file example. No explicit model (haiku default). Demonstrates
+  `context: fork`, `allowed-tools`, and auxiliary resource file layout.
+- `global-config/claudecode/CLAUDE.md` — Global git workflow rules (two-phase
+  push protocol, conventional commits). Deploy to `~/.claude/CLAUDE.md`.
+  Replaces the global `git-flow` agent for Claude Code sessions.
+- `global-config/claudecode/skills/git-flow/` — Optional git-flow skill.
+  Provides explicit `/git-flow` invocation and serves as a reference
+  implementation of the skill + supporting-file pattern.
+- `global-config/claudecode/README.md` — Install instructions for Claude Code
+  global config (manual and nix home-manager paths).
+- `CLAUDE.md` (template repo root) — Instructions for working on this template
+  repo itself.
+- `.claude/settings.json` (template repo root) — Minimal project permissions
+  for this repo.
+
+### Convention established
+- **Claude Code orchestrator** → session model set in `.claude/settings.json`
+  (`claude-opus-4-6`); no model in CLAUDE.md itself.
+- **Claude Code subagents** → no explicit `model:` in frontmatter; sonnet
+  default applies.
+- **Claude Code skills/commands** → no explicit `model:` in frontmatter; haiku
+  default applies.
+- **git-flow** → dropped as a Claude Code agent; behavior captured in global
+  `CLAUDE.md` rules. Skill provided as optional override and pattern reference.
+
+---
+
 ## [1.0.0] — 2026-03-07
 
 ### Added
