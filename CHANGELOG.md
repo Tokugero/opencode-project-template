@@ -10,6 +10,23 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.0.0] — 2026-03-07
+
+### Added
+- `template/opencode.json`: `"model": "anthropic/claude-sonnet-4-6"` and
+  `"small_model": "anthropic/claude-haiku-4-5"` as project defaults. Establishes
+  the three-tier Anthropic model hierarchy as a first-class template convention.
+- `template/.opencode/agents/project-orchestrator.md`: `model: anthropic/claude-opus-4-6`
+  frontmatter — orchestrators receive the most capable model; subagents inherit
+  sonnet from the global default.
+
+### Convention established
+- **Orchestrators** → `anthropic/claude-opus-4-6` (pinned in agent frontmatter)
+- **General reasoning / subagents** → `anthropic/claude-sonnet-4-6` (global `model`)
+- **Lightweight tooling** (title generation, etc.) → `anthropic/claude-haiku-4-5` (global `small_model`)
+
+---
+
 ## [0.9.0] — 2026-03-04
 
 ### Added
