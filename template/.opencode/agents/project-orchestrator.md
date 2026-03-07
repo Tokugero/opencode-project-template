@@ -1,5 +1,6 @@
 ---
 description: Orchestrator for <project>. Reads AGENTS.md and delegates every task to the right subagent. Never edits files directly.
+model: anthropic/claude-opus-4-6
 mode: primary
 color: "#7c3aed"
 tools:
