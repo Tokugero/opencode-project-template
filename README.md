@@ -82,6 +82,7 @@ opencode-project-template/
     ├── CLAUDE.md               ← Claude Code orchestrator + dispatch table
     ├── SUMMARY.md              ← subsystem SUMMARY stub (one copy per subsystem)
     ├── opencode.json           ← OpenCode: MCP config + default_agent stub
+    ├── .mcp.json               ← Claude Code: MCP server config (stdio + http examples)
     ├── protocols.md            ← secrets, permission gates, code style
     ├── .opencode/
     │   └── agents/             ← OpenCode agent templates
@@ -89,7 +90,7 @@ opencode-project-template/
     │       ├── project-sre.md
     │       └── project-role.md
     ├── .claude/
-    │   ├── settings.json       ← Claude Code: MCP config + permissions stub
+    │   ├── settings.json       ← Claude Code: session model + permissions stub
     │   ├── agents/             ← Claude Code subagent templates
     │   │   ├── project-sre.md
     │   │   └── project-role.md
@@ -128,7 +129,8 @@ This repo is versioned with semver. Consuming projects pin the version in
 | `template/CLAUDE.md` | Claude Code | Yes — customise | Orchestrator instructions + dispatch table (merges AGENTS.md role). |
 | `template/SUMMARY.md` | Both | Yes — one per subsystem | Subsystem context for subagents. |
 | `template/opencode.json` | OpenCode | Yes — customise | MCP server config + `default_agent`. |
-| `template/.claude/settings.json` | Claude Code | Yes — customise | MCP server config + session model + permissions. |
+| `template/.mcp.json` | Claude Code | Yes — customise | MCP server config stub; shows both `stdio` and `http` server types. |
+| `template/.claude/settings.json` | Claude Code | Yes — customise | Session model + permissions stub. MCP servers go in `.mcp.json`. |
 | `template/protocols.md` | Both | Yes | Secrets, permission gates, code style. |
 | `template/.opencode/agents/project-orchestrator.md` | OpenCode | Yes — rename + customise | Primary orchestrator (`mode: primary`). Never edits files. |
 | `template/.opencode/agents/project-sre.md` | OpenCode | Yes — rename + customise | Cross-system SRE observer. Read-only. |
@@ -295,10 +297,17 @@ For each file below, copy from `template/` and substitute every `<placeholder>`:
 
 #### Settings / config
 
-**Claude Code:** `template/.claude/settings.json` → `.claude/settings.json`
+**Claude Code (MCP servers):** `template/.mcp.json` → `.mcp.json`
 
-Remove the `REPLACE_ME` MCP stub or replace it with real MCP servers.
-If no MCP servers are needed yet, remove the `mcpServers` block entirely.
+Replace or remove the placeholder server entries. Two types are shown:
+- `stdio` — a locally-installed MCP server binary (e.g. `mcp-server-playwright`)
+- `http` — a locally-running HTTP MCP server (e.g. `http://localhost:PORT/mcp/`)
+
+Remove any entries not needed; delete the file entirely if no MCP servers are required.
+
+**Claude Code (settings):** `template/.claude/settings.json` → `.claude/settings.json`
+
+No MCP servers here — those live in `.mcp.json`. No placeholder substitution needed; keep as-is or adjust permissions.
 
 **OpenCode:** `template/opencode.json` → `opencode.json`
 

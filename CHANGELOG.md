@@ -10,6 +10,21 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.2.0] — 2026-03-07
+
+### Added
+- `template/.mcp.json` — Claude Code MCP server config stub. Demonstrates both
+  `stdio` (locally-installed binary) and `http` (local HTTP endpoint) server
+  types with placeholder entries. Based on working example from a real project.
+  This is the canonical location for MCP server config in Claude Code projects.
+
+### Changed
+- `template/.claude/settings.json` — removed `mcpServers` block. MCP servers
+  now live exclusively in `.mcp.json`; `settings.json` retains session model
+  and permissions only.
+
+---
+
 ## [1.1.0] — 2026-03-07
 
 ### Added

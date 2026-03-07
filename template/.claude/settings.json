@@ -1,12 +1,5 @@
 {
   "model": "claude-opus-4-6",
-  "mcpServers": {
-    "REPLACE_ME": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "REPLACE_WITH_MCP_SERVER"]
-    }
-  },
   "permissions": {
     "allow": [
       "Bash(find *)",

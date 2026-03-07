@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "REPLACE_stdio_example": {
+      "type": "stdio",
+      "command": "mcp-server-name",
+      "args": []
+    },
+    "REPLACE_http_example": {
+      "type": "http",
+      "url": "http://localhost:PORT/mcp/"
+    }
+  }
+}
