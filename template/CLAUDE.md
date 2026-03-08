@@ -76,6 +76,42 @@ When delegating via the Task tool, always set the `model` parameter explicitly.
 6. Route all git operations to the built-in git workflow — never run git
    commands directly.
 
+### Parallel output collation (team environments)
+
+When multiple agents run in parallel and produce findings that target the same
+output file (e.g. `docs/security-findings.md`, `docs/code-review-findings.md`),
+**do not let them write to the same file**. Collisions corrupt output and cause
+silent data loss.
+
+**Protocol:**
+
+1. **Each agent writes to a unique temp file.**
+   Instruct each agent to write its output to
+   `docs/.tmp/<agent-name>-<output-type>.md`
+   (e.g. `docs/.tmp/sec-api-security-findings.md`). The agent must create the
+   `.tmp/` directory if it doesn't exist.
+
+2. **Orchestrator concatenates after all agents complete.**
+   Once every agent in the batch has reported back, the orchestrator (or a
+   delegated subagent) concatenates the temp files into the final target file:
+   ```bash
+   cat docs/.tmp/*-<output-type>.md > docs/<output-type>.md
+   ```
+
+3. **A consolidation agent deduplicates and normalises.**
+   Spawn a single subagent to review the concatenated file. Its job:
+   - Remove duplicate findings (same vulnerability in overlapping scopes).
+   - Normalise severity ratings where agents disagree on the same issue.
+   - Merge related findings into a single entry with cross-references.
+   - Produce a clean, final version of the output file.
+
+4. **Clean up temp files.**
+   After the consolidated file is approved, remove `docs/.tmp/`.
+
+This protocol applies to **any team workflow** where multiple agents produce
+output destined for the same file — security audits, code reviews, performance
+reports, etc.
+
 ### Code-writing agent requirements
 
 **Any agent that writes code must be the primary subagent for that component.**

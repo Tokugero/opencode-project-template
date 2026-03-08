@@ -10,6 +10,17 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.5.0] — 2026-03-08
+
+### Added
+- `template/CLAUDE.md` — "Parallel output collation (team environments)" section
+  in Delegation rules. When multiple agents run in parallel and target the same
+  output file, each agent writes to `docs/.tmp/<agent-name>-<output-type>.md`.
+  After all complete, the orchestrator concatenates and spawns a consolidation
+  agent to deduplicate and normalise findings. Prevents file collision data loss.
+
+---
+
 ## [1.4.0] — 2026-03-08
 
 ### Added
