@@ -10,6 +10,40 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.3.0] — 2026-03-08
+
+### Added
+- `global-config/claudecode/agents/security-audit.md` — Opus-pinned global
+  agent for OWASP Top 10 static analysis. Auto-detects project stack, reads
+  cached OWASP reference docs, writes findings to `docs/security-findings.md`.
+- `global-config/claudecode/agents/code-review.md` — Opus-pinned global agent
+  for language-agnostic code quality review (design patterns, DRY, test
+  coverage, readability). Writes findings to `docs/code-review-findings.md`.
+- `global-config/claudecode/agents/perf-engineer.md` — Opus-pinned global
+  agent for dynamic performance analysis in sandboxed local/dev environments.
+  Writes findings to `docs/performance-findings.md`.
+- `global-config/claudecode/security/owasp-web-top10.md`,
+  `owasp-api-top10.md`, `owasp-llm-top10.md` — cached OWASP reference
+  documents for the security-audit agent (Web 2021, API 2023, LLM 2025).
+- `global-config/claudecode/README.md` — updated with installation
+  instructions for the three new global agents.
+
+### Changed
+- `template/CLAUDE.md` — subagent roster table gains a **Model** column.
+  Dispatch table now includes security-audit, code-review, and perf-engineer
+  as global agents (opus-pinned). Added explicit `model` parameter guidance
+  when delegating via the Task tool.
+- `template/CLAUDE.md` — new "Never edit code or config directly" section
+  explaining *why* the orchestrator must always delegate: `function_signature.md`
+  maintenance, `in-progress.md` tracking, ask-first protocol, KB creation,
+  and convention adherence.
+- `template/CLAUDE.md` — new "Code-writing agent requirements" section
+  enforcing that code-writing agents must be the primary subagent for their
+  component, must read the component's CLAUDE.md first, and must use Sonnet
+  (minimum) for all code changes.
+
+---
+
 ## [1.2.0] — 2026-03-07
 
 ### Added

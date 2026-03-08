@@ -74,6 +74,22 @@ When delegating via the Task tool, always set the `model` parameter explicitly.
 6. Route all git operations to the built-in git workflow — never run git
    commands directly.
 
+### Code-writing agent requirements
+
+**Any agent that writes code must be the primary subagent for that component.**
+It must understand the component's code structure, coding guidelines, and
+architecture before making changes. Concretely:
+
+- The agent must read the component's `CLAUDE.md` / agent file before editing.
+- Use **Sonnet** (minimum) for all code changes — never Haiku. Writing code
+  requires sufficient reasoning ability to understand the implications of
+  changes in context.
+- **Audit/review agents find issues; component experts fix them.** The
+  security-audit, code-review, and perf-engineer agents are read-only
+  analysts. Route their findings to the owning subagent for remediation.
+- Haiku is acceptable only for trivial non-code tasks (doc status updates,
+  label changes, etc.).
+
 ### When to delegate to @<project>-sre
 
 Always invoke `@<project>-sre` **before touching code** for:
