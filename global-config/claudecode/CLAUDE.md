@@ -42,6 +42,13 @@ summary before executing.
 
 ---
 
+## Agent teams
+- When creating agent teams, default to 3 teammates unless I specify otherwise
+- When leading an agent team, announce which model and approach each teammate is using before they start work
+- Team leaders must always use Opus unless the user explicitly specifies otherwise. Opus has the context depth and reasoning needed to make sound delegation decisions. Leaders delegate work to Sonnet or Haiku teammates depending on task complexity — Sonnet for implementation, Haiku for simple lookups and formatting
+
+---
+
 ## Permission gates — always ask before:
 
 1. Writing or modifying any secret or credential file
