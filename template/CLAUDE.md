@@ -85,28 +85,43 @@ silent data loss.
 
 **Protocol:**
 
-1. **Each agent writes to a unique temp file.**
+1. **All output stays in `docs/.tmp/`.**
+   Every file produced during a team workflow — intermediate and final — must
+   be written to `docs/.tmp/`. Never write findings, summaries, or exceptions
+   directly to `docs/` or any other tracked location. `docs/.tmp/` is
+   gitignored and treated as ephemeral workspace.
+
+2. **Each agent writes to a unique temp file.**
    Instruct each agent to write its output to
    `docs/.tmp/<agent-name>-<output-type>.md`
    (e.g. `docs/.tmp/sec-api-security-findings.md`). The agent must create the
    `.tmp/` directory if it doesn't exist.
 
-2. **Orchestrator concatenates after all agents complete.**
+3. **Orchestrator concatenates after all agents complete.**
    Once every agent in the batch has reported back, the orchestrator (or a
-   delegated subagent) concatenates the temp files into the final target file:
+   delegated subagent) concatenates the temp files into the final target file
+   **within `docs/.tmp/`**:
    ```bash
-   cat docs/.tmp/*-<output-type>.md > docs/<output-type>.md
+   cat docs/.tmp/*-<output-type>.md > docs/.tmp/<output-type>.md
    ```
 
-3. **A consolidation agent deduplicates and normalises.**
+4. **A consolidation agent deduplicates and normalises.**
    Spawn a single subagent to review the concatenated file. Its job:
    - Remove duplicate findings (same vulnerability in overlapping scopes).
    - Normalise severity ratings where agents disagree on the same issue.
    - Merge related findings into a single entry with cross-references.
-   - Produce a clean, final version of the output file.
+   - Produce a clean, final version of the output file **in `docs/.tmp/`**.
 
-4. **Clean up temp files.**
-   After the consolidated file is approved, remove `docs/.tmp/`.
+5. **Consolidation agent cleans up intermediate files.**
+   After producing the final consolidated output, the consolidation agent
+   must delete all intermediate files (per-agent reports, raw concatenations)
+   from `docs/.tmp/`. Only the final deliverables should remain.
+
+6. **Use absolute paths for all `docs/.tmp/` operations.**
+   Never `cd` into `docs/.tmp/`. Always use paths relative to the repo root
+   (e.g. `docs/.tmp/fixed-summary.md`) or absolute paths. Changing the
+   working directory causes subsequent relative-path operations to create
+   nested directories or miss files.
 
 This protocol applies to **any team workflow** where multiple agents produce
 output destined for the same file — security audits, code reviews, performance

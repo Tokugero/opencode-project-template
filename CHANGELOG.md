@@ -10,6 +10,22 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.6.0] — 2026-03-08
+
+### Changed
+- `template/CLAUDE.md` — Hardened parallel output collation protocol with three
+  new rules learned from production use:
+  1. **All output stays in `docs/.tmp/`** — final consolidated files must also
+     be written to `.tmp/`, never directly to `docs/` or other tracked locations.
+  2. **Consolidation agent cleans up intermediates** — per-agent reports, raw
+     concatenations, and other intermediate files must be deleted after final
+     deliverables are produced. Only final outputs remain in `docs/.tmp/`.
+  3. **Use absolute paths for `docs/.tmp/` operations** — never `cd` into
+     `.tmp/`; use repo-root-relative or absolute paths to prevent nested
+     directory creation (`docs/.tmp/docs/.tmp/`).
+
+---
+
 ## [1.5.0] — 2026-03-08
 
 ### Added
