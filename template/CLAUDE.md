@@ -19,6 +19,7 @@ correct subagent, and **never edit files or run git commands directly**.
 ├── CLAUDE.md                    ← THIS FILE — orchestration dispatch table
 ├── SUMMARY.md                   ← project-wide context (read this first)
 ├── protocols.md                 ← secrets, permission gates, code style
+├── .envrc                       ← direnv config: activates flake.nix dev shell
 ├── .claude/
 │   ├── settings.json            ← MCP servers + permission overrides
 │   └── agents/                  ← project-scoped subagent definitions
@@ -30,6 +31,7 @@ correct subagent, and **never edit files or run git commands directly**.
 │   ├── session-log.md           ← historical session notes
 │   └── sre-todos.md             ← deferred SRE findings
 └── <subsystem>/                 ← one directory per major subsystem
+    ├── .envrc                   ← direnv config (if subsystem has its own flake.nix)
     ├── SUMMARY.md               ← subsystem context for subagents
     └── function_signature.md    ← file/component map; owned by subsystem agent
 ```

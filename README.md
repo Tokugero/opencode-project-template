@@ -81,6 +81,7 @@ opencode-project-template/
     ├── AGENTS.md               ← OpenCode orchestrator dispatch table
     ├── CLAUDE.md               ← Claude Code orchestrator + dispatch table
     ├── SUMMARY.md              ← subsystem SUMMARY stub (one copy per subsystem)
+    ├── .envrc                  ← direnv config: `use flake` for Nix dev shell activation
     ├── opencode.json           ← OpenCode: MCP config + default_agent stub
     ├── .mcp.json               ← Claude Code: MCP server config (stdio + http examples)
     ├── protocols.md            ← secrets, permission gates, code style
@@ -127,6 +128,7 @@ This repo is versioned with semver. Consuming projects pin the version in
 |-----------|------|-----------------|---------|
 | `template/AGENTS.md` | OpenCode | Yes — customise | Orchestrator dispatch table read every session. |
 | `template/CLAUDE.md` | Claude Code | Yes — customise | Orchestrator instructions + dispatch table (merges AGENTS.md role). |
+| `template/.envrc` | Both | Yes — one per flake.nix | direnv config: `use flake` activates the Nix dev shell. Copy to project root and each subsystem that has its own `flake.nix`. Requires `direnv` + `nix-direnv` on the machine. |
 | `template/SUMMARY.md` | Both | Yes — one per subsystem | Subsystem context for subagents. |
 | `template/opencode.json` | OpenCode | Yes — customise | MCP server config + `default_agent`. |
 | `template/.mcp.json` | Claude Code | Yes — customise | MCP server config stub; shows both `stdio` and `http` server types. |
@@ -262,9 +264,14 @@ Copy these files from `template/` into the project root as-is:
 - `template/kb/README.md` → `kb/README.md`
 - `template/docs/sre-todos.md` → `docs/sre-todos.md`
 - `template/protocols.md` → `protocols.md`
+- `template/.envrc` → `.envrc` (and one copy per subsystem directory that has
+  its own `flake.nix`)
 
 Also append `template/` entries from the template `.gitignore` to any existing
 `.gitignore` in the project — do not overwrite.
+
+After first checkout, run `direnv allow` in the project root (and each
+subsystem directory with a `.envrc`). This is a one-time security gate.
 
 Then create `.template-local` (gitignored, machine-specific) in the project root:
 

@@ -10,6 +10,26 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.4.0] — 2026-03-08
+
+### Added
+- `template/.envrc` — direnv config file containing `use flake`. Activates the
+  Nix dev shell automatically when entering any directory with a `flake.nix`.
+  Copy to project root and each subsystem with its own flake. Requires `direnv`
+  + `nix-direnv` on the machine (deployed via NixOS/home-manager, not this repo).
+- `template/protocols.md` — new "Dev Shell — direnv + Nix" section documenting
+  machine prerequisites, per-checkout setup (`direnv allow`), and how per-directory
+  shell activation works. Explains why this matters for Claude Code subagents.
+
+### Changed
+- `template/CLAUDE.md` — repository structure tree updated to include `.envrc`
+  at project root and per-subsystem level.
+- `README.md` — repository layout tree, "What each file is for" table, and
+  Step 1 (files to copy verbatim) updated to include `.envrc`. Added
+  `direnv allow` post-checkout instruction.
+
+---
+
 ## [1.3.0] — 2026-03-08
 
 ### Added

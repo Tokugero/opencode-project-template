@@ -63,6 +63,33 @@ Both `secrets/*` and `.env` are gitignored and never committed.
 
 ---
 
+## Dev Shell — direnv + Nix
+
+This project uses `direnv` with `nix-direnv` to automatically activate the
+correct Nix dev shell when you `cd` into a directory with a `flake.nix`.
+
+**Machine prerequisites** (deployed via NixOS/home-manager, not this repo):
+- `direnv` — automatically loads/unloads env vars per directory
+- `nix-direnv` — provides the `use flake` directive for direnv
+- Shell hook enabled (e.g. `programs.direnv.enable = true` in home-manager)
+
+**Per-checkout setup** (one-time after clone):
+```sh
+direnv allow                    # project root
+direnv allow <subsystem>/       # each subsystem with its own flake.nix
+```
+
+Each `.envrc` contains `use flake`, which activates the `flake.nix` in the
+same directory. Subsystems with their own `flake.nix` get a dedicated shell
+with subsystem-specific dependencies; subsystems without one inherit the
+root shell.
+
+This ensures every subprocess — including Claude Code subagents and Task tool
+workers — runs inside the correct Nix dev shell with all native libraries
+(e.g. `libstdc++.so.6` for numpy) on `LD_LIBRARY_PATH`.
+
+---
+
 ## Helpful Commands
 
 ```sh
