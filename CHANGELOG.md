@@ -10,6 +10,30 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.8.0] — 2026-03-09
+
+### Changed
+- `global-config/claudecode/skills/sdlc-audit/SKILL.md` — Phase 3 (Fix Sweep)
+  and Phase 5 (Fix Insufficient) now require Opus leads that spawn short-lived
+  Sonnet workers, replacing the previous pattern of Sonnet agents owning all
+  fixes. The previous architecture caused Sonnet agents to compact mid-task
+  when given 15-22 findings each, losing progress and remaining work. The new
+  pattern separates planning (Opus reads code, plans exact changes, batches
+  2-4 fixes) from execution (Sonnet receives explicit file paths, line numbers,
+  and exact code changes — commits and exits). Sonnet workers never hold more
+  than ~4 fixes of context, eliminating compaction risk.
+- `global-config/claudecode/skills/sdlc-audit/SKILL.md` — Added delta audit
+  mode via optional `--since=<tag>` argument. When provided: runs `git diff
+  --name-only <tag>..HEAD` to identify changed files, traces callers/callees
+  with Grep to find adjacent code paths, and scopes all audit agent prompts to
+  changed + adjacent files only. Makes continuous auditing cost-effective
+  (review changes since last release, not the entire repo). When omitted,
+  behavior is unchanged (full repo audit). Added header-level documentation in
+  the skill's opening sections and updated `argument-hint` and `description`
+  frontmatter accordingly.
+
+---
+
 ## [1.7.0] — 2026-03-09
 
 ### Added

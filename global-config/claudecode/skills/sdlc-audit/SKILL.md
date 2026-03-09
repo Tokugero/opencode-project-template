@@ -4,7 +4,9 @@ description: >
   Repeatable codebase audit & fix cycle using parallel agent teams.
   Phases: audit, consolidate, fix, validate. All output stays in
   docs/.tmp/ (gitignored, never committed).
-argument-hint: "[phase: audit|consolidate|fix|validate|full] [scope: path/to/component,...]"
+  Supports delta-scoped audits via --since=<tag> to review only changed
+  files and their adjacent code paths (cost-effective for continuous use).
+argument-hint: "[phase: audit|consolidate|fix|validate|full] [scope: path/to/component,...] [--since=<git-tag>]"
 user-invocable: true
 allowed-tools: Bash(*), Read, Grep, Glob, Write(docs/.tmp/*), Task, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
@@ -15,11 +17,45 @@ A repeatable cycle that takes a codebase from "unknown state" to "audited,
 fixed, and validated" using parallel agent teams with structured output
 collation.
 
+## Fix sweep architecture note
+
+Phase 3 (Fix Sweep) and Phase 5 (Fix Insufficient) use an Opus-leads-Sonnet-
+workers pattern rather than monolithic Sonnet agents. The reason: when a single
+Sonnet agent holds 15-22 findings in context across many files, it compacts
+mid-task and loses track of remaining work, producing incomplete or duplicated
+fixes. The solution is to separate planning (Opus) from execution (Sonnet):
+- Each Opus lead reads the full code, plans the approach, and breaks work into
+  batches of 2-4 related fixes.
+- Each Sonnet worker receives explicit instructions (file paths, line numbers,
+  exact changes) — no reasoning required, just execution.
+- Sonnet workers commit, run tests, and exit. They never hold more than ~4
+  fixes of context, eliminating compaction risk.
+
+## Delta audit mode (--since=<tag>)
+
+When `--since=<tag>` is provided, audits are scoped to changed files and their
+immediate callers/callees instead of the full repo:
+
+1. Run `git diff --name-only <tag>..HEAD` to identify changed files.
+2. For each changed file, trace callers and callees to find adjacent code paths
+   that should also be reviewed (use Grep to find imports and function
+   references).
+3. Scope all audit agent prompts to: changed files + adjacent files only.
+4. Note in every output file that this is a delta audit scoped since `<tag>`.
+
+This makes continuous auditing cost-effective — review changes since the last
+release rather than the entire repo. When omitted, behavior is unchanged (full
+repo audit).
+
 Parse the user's arguments first:
 - If the first argument is one of `audit`, `consolidate`, `fix`, `validate`,
   or `full`, treat it as the phase selector. Default to `full` if omitted.
 - If a `scope` argument is present (comma-separated paths), limit all phases
   to those components only. If omitted, treat the entire repo as in scope.
+- If `--since=<tag>` is present, activate delta audit mode as described above.
+  The resolved file list replaces the default full-repo scope. If `scope` is
+  also provided, intersect both: use only files that appear in both the delta
+  set and the explicit scope.
 
 ---
 
@@ -148,7 +184,7 @@ proceed past this point without explicit user approval.
 
 ---
 
-## Phase 3: Fix Sweep (parallel dev teams)
+## Phase 3: Fix Sweep (Opus leads + Sonnet workers)
 
 Run this phase when `phase` is `fix` or `full` (after the gate above has been
 passed and the branch has been created).
@@ -156,34 +192,48 @@ passed and the branch has been created).
 Verify that `docs/.tmp/consolidated-fix-list.md` exists before proceeding. If
 it does not, abort and tell the user to run the `consolidate` phase first.
 
-1. Create a team via TeamCreate. Use 3 dev agents (Sonnet minimum,
-   general-purpose) unless the user specified otherwise. Name the team
-   `sdlc-fix`.
-2. Announce to the user which model and approach each dev agent will use.
-3. Read `docs/.tmp/consolidated-fix-list.md` and partition the findings into
+This phase uses an Opus-leads-Sonnet-workers architecture. Do NOT spawn Sonnet
+agents to own all the fixes themselves — they will compact and lose context when
+given 15-22 findings each. Instead:
+
+1. Create a team via TeamCreate. Use 3 Opus leads (general-purpose,
+   `model: "opus"`) unless the user specified otherwise. Name the team
+   `sdlc-fix`. Announce to the user which model and approach each lead will use.
+2. Read `docs/.tmp/consolidated-fix-list.md` and partition the findings into
    groups. Group by **code path**, not by service boundary. If a fix touches
    the API layer, the database layer, and an MCP handler, all three belong to
-   the same group and must go to the same agent. Never split a cross-cutting
-   change across agents — they will produce merge conflicts.
-4. Create one task per group via TaskCreate and assign to dev agents via
+   the same group and must go to the same Opus lead. Never split a cross-cutting
+   change across leads — they will produce merge conflicts.
+3. Create one task per group via TaskCreate and assign to Opus leads via
    TaskUpdate.
-5. Each dev agent must:
+4. Each Opus lead must:
    a. Claim their task (TaskUpdate status to `in_progress`).
-   b. Implement all fixes in the group. All commits go on the current branch
-      (`sdlc-audit/<date>` created in the gate above) — do not create or
-      switch branches.
-   c. Commit each fixed issue individually with a conventional commit:
-      ```
-      fix(scope): description
+   b. Read the relevant source files for the assigned findings thoroughly.
+   c. Plan the fixes — determine the exact changes needed (file paths, line
+      numbers, code to add/remove) for each finding.
+   d. Break the plan into batches of 2-4 related fixes. For each batch, spawn
+      a short-lived Sonnet worker via the Task tool with:
+      - Explicit file paths and line numbers for every change.
+      - The exact code to add, remove, or replace — no reasoning required.
+      - Instructions to commit each fix individually using a conventional commit:
+        ```
+        fix(scope): description
 
-      Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
-      ```
-   d. Write a summary of what was fixed to `docs/.tmp/fixed-<agent-name>.md`.
-   e. Write any findings that turned out to be non-issues or required exceptions
+        Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+        ```
+      - Instructions to run the relevant test suite after all fixes in the
+        batch are committed and to report pass/fail back to the lead.
+      - All commits go on the current branch (`sdlc-audit/<date>`) — do not
+        create or switch branches.
+   e. Wait for each Sonnet worker to complete and confirm tests pass before
+      spawning the next batch.
+   f. Write a summary of what was fixed (across all batches) to
+      `docs/.tmp/fixed-<agent-name>.md`.
+   g. Write any findings that turned out to be non-issues or required exceptions
       to `docs/.tmp/new-exceptions-<agent-name>.md`.
-   f. Mark the task completed (TaskUpdate status to `completed`).
-   g. Call TaskList to find the next unclaimed task and repeat.
-6. Wait for all dev agents to report completion. Send shutdown_request to each
+   h. Mark the task completed (TaskUpdate status to `completed`).
+   i. Call TaskList to find the next unclaimed task and repeat.
+5. Wait for all Opus leads to report completion. Send shutdown_request to each
    and call TeamDelete once all have shut down.
 
 ---
@@ -230,9 +280,14 @@ Run this phase automatically after Phase 4 when `phase` is `full`.
 
 1. Scan all `docs/.tmp/sec-val-*.md` files for any verdict of `INSUFFICIENT`.
 2. If none exist, skip this phase and tell the user validation passed cleanly.
-3. If any `INSUFFICIENT` verdicts exist, collect them and dispatch targeted fix
-   tasks to a small team (1-2 dev agents, Sonnet, general-purpose). Name the
-   team `sdlc-remediate`.
+3. If any `INSUFFICIENT` verdicts exist, collect them and apply the same
+   Opus-leads-Sonnet-workers architecture as Phase 3. Spawn 1-2 Opus leads
+   (general-purpose, `model: "opus"`). Name the team `sdlc-remediate`.
+   - Each Opus lead reads the source, plans the targeted fix, then spawns
+     short-lived Sonnet workers with explicit instructions (file paths, line
+     numbers, exact changes) for batches of 2-4 related fixes.
+   - Sonnet workers commit each fix individually and run relevant tests.
+   - Opus leads confirm test results before spawning the next batch.
 4. These are usually small, focused fixes. Apply the same per-fix commit
    discipline from Phase 3. All commits go on the same `sdlc-audit/<date>`
    branch — do not switch branches.
