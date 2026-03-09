@@ -14,6 +14,8 @@ These files are deployed once per workstation to `~/.claude/`. They are
 | `agents/code-review.md` | `~/.claude/agents/code-review.md` | Language-agnostic code quality review. Checks test coverage, DRY, SOLID, naming, error handling, API design. Pinned to opus. |
 | `agents/perf-engineer.md` | `~/.claude/agents/perf-engineer.md` | Dynamic performance analysis in local/dev environments. Measures latency, scaling, caching, cost. Sandboxes itself. Pinned to opus. |
 | `security/owasp-*.md` | `~/.claude/security/owasp-*.md` | Cached OWASP Top 10 reference docs (Web, API, LLM). Read by security-audit agent at startup. Update manually when OWASP publishes new versions. |
+| `skills/sdlc-audit/` | `~/.claude/skills/sdlc-audit/` | Repeatable codebase audit & fix cycle using parallel agent teams. Phases: audit, consolidate, fix, validate. Output stays in docs/.tmp/. |
+| `skills/sdlc-review/` | `~/.claude/skills/sdlc-review/` | Read-only codebase review using parallel audit agents. Produces consolidated findings in docs/.tmp/ without code changes. |
 | `skills/git-flow/` | `~/.claude/skills/git-flow/` | Example skill: git operations. **Optional** — Claude Code has built-in git workflow. Install only if you want to override the default with the two-phase push protocol. |
 
 ---
@@ -31,9 +33,11 @@ mkdir -p ~/.claude/agents ~/.claude/security
 cp global-config/claudecode/agents/*.md ~/.claude/agents/
 cp global-config/claudecode/security/*.md ~/.claude/security/
 
-# Skills (optional)
+# Skills
 mkdir -p ~/.claude/skills
-cp -r global-config/claudecode/skills/git-flow ~/.claude/skills/
+cp -r global-config/claudecode/skills/sdlc-audit ~/.claude/skills/
+cp -r global-config/claudecode/skills/sdlc-review ~/.claude/skills/
+cp -r global-config/claudecode/skills/git-flow ~/.claude/skills/  # optional
 ```
 
 ### Via nix home-manager (recommended)
@@ -52,16 +56,55 @@ programs.claude-code = {
     perf-engineer = ./claudecode/agents/perf-engineer.md;
   };
 
-  # Optional: install the git-flow skill
-  # skills = {
-  #   git-flow = ./claudecode/skills/git-flow;
-  # };
+  skills = {
+    sdlc-audit = ./claudecode/skills/sdlc-audit;
+    sdlc-review = ./claudecode/skills/sdlc-review;
+    # git-flow = ./claudecode/skills/git-flow;  # optional — Claude Code has built-in git
+  };
 };
 
 # OWASP reference docs for security-audit agent
 home.file.".claude/security/owasp-web-top10.md".source = ./claudecode/security/owasp-web-top10.md;
 home.file.".claude/security/owasp-api-top10.md".source = ./claudecode/security/owasp-api-top10.md;
 home.file.".claude/security/owasp-llm-top10.md".source = ./claudecode/security/owasp-llm-top10.md;
+```
+
+---
+
+## Recommended environment
+
+The following are required (or strongly recommended) for full skill
+functionality, particularly for `sdlc-audit` and `sdlc-review`.
+
+### MCP servers
+
+| Server | Transport | URI / command |
+|--------|-----------|---------------|
+| `mermaid` | SSE | `https://mcp.mermaid.ai/sse` |
+| `tmux` | stdio | `npx -y tmux-mcp` |
+
+Configure these in your Claude Code MCP settings (e.g. via
+`programs.claude-code.mcpServers` in nix home-manager, or by editing
+`~/.claude/claude_desktop_config.json` directly).
+
+### Environment variables
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | `1` | Required for `sdlc-audit` and `sdlc-review` — enables the TeamCreate/TeamDelete/SendMessage tools used to run parallel audit agents. Without this set, any skill that calls TeamCreate will fail silently. |
+
+Set this in your shell profile (e.g. `~/.zshenv` or `~/.profile`):
+
+```bash
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+```
+
+Or via nix home-manager:
+
+```nix
+home.sessionVariables = {
+  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+};
 ```
 
 ---
@@ -90,3 +133,17 @@ instead of ambient behavior.
 
 Use a skill when the supporting files meaningfully add capability (lookup
 tables, scripts, step-by-step checklists). Use a command for simple prompts.
+
+The **primary recommended skills** in this repo are `sdlc-audit` and
+`sdlc-review`:
+
+- `/sdlc-review` — start here for a read-only audit of any codebase. Produces
+  consolidated findings in `docs/.tmp/` without touching source code.
+- `/sdlc-audit` — full audit-fix-validate cycle. Runs review, collates
+  findings, applies fixes on a dedicated branch, and validates the results.
+  Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (see Recommended
+  environment above).
+
+The `git-flow` skill remains **optional** — it demonstrates the skill pattern
+and provides an explicit `/git-flow` command, but Claude Code's built-in git
+workflow covers the same ground for most users.

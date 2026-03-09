@@ -10,6 +10,23 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.7.0] — 2026-03-09
+
+### Added
+- `global-config/claudecode/skills/sdlc-audit/` — repeatable audit & fix cycle
+  skill using parallel agent teams. Phases: audit, consolidate, fix, validate.
+  All output stays in `docs/.tmp/` (gitignored, never committed).
+- `global-config/claudecode/skills/sdlc-review/` — read-only codebase review
+  skill using parallel audit agents. Produces consolidated findings in
+  `docs/.tmp/` without making code changes.
+- `global-config/claudecode/README.md` — documented both new skills in the
+  deployment table and install instructions; added "Recommended environment"
+  section covering required MCP servers (`mermaid`, `tmux`) and the
+  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` env var; updated design notes to
+  call out `sdlc-audit`/`sdlc-review` as the primary recommended skills.
+
+---
+
 ## [1.6.0] — 2026-03-08
 
 ### Changed
