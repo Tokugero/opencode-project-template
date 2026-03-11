@@ -316,6 +316,8 @@ Remove any entries not needed; delete the file entirely if no MCP servers are re
 
 No MCP servers here — those live in `.mcp.json`. No placeholder substitution needed; keep as-is or adjust permissions.
 
+**Do not skip this file.** It pins the main session model to `claude-opus-4-6`. If `.claude/settings.json` is absent, Claude Code falls back to the user's global `~/.claude/settings.json`, which may be set to a different (typically lower-tier) model. The result is the orchestrator running on Sonnet or Haiku instead of Opus — silently, with no warning.
+
 **OpenCode:** `template/opencode.json` → `opencode.json`
 
 Set `default_agent` to match your orchestrator filename (without `.md`).
@@ -401,6 +403,7 @@ After all files are written, confirm:
 - [ ] Every `<placeholder>` replaced — search for `<` in all copied files
 - [ ] Dispatch table (`CLAUDE.md` or `AGENTS.md`) roster matches actual agent files
 - [ ] Settings file has no `REPLACE_ME` stubs (remove or replace MCP entries)
+- [ ] `.claude/settings.json` exists and `model` is set to `claude-opus-4-6`
 - [ ] `.template-local` exists with the correct version and path
 - [ ] `global-config/` was NOT copied into the project
 - [ ] No application code, infra config, or runtime setup was created

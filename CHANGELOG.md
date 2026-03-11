@@ -10,6 +10,20 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.9.0] — 2026-03-11
+
+### Changed
+- `README.md` — Step 2 settings section: added explicit warning that
+  `.claude/settings.json` must not be skipped. Explains that it pins the
+  main session to `claude-opus-4-6` and that omitting it silently falls back
+  to the user's global `~/.claude/settings.json`, which may be a lower-tier
+  model.
+- `README.md` — Step 5 verification checklist: added
+  `- [ ] .claude/settings.json exists and model is set to claude-opus-4-6`
+  so the model pin is confirmed before the init is declared complete.
+
+---
+
 ## [1.8.0] — 2026-03-09
 
 ### Changed
