@@ -127,6 +127,56 @@ This protocol applies to **any team workflow** where multiple agents produce
 output destined for the same file — security audits, code reviews, performance
 reports, etc.
 
+### Large task planning and execution protocol
+
+Use this three-phase pattern for any work spanning 10+ items across multiple
+subsystems. The goal is to concentrate expensive reasoning where it matters
+(design) and route bulk writing to commodity workers that already hold context.
+
+**Phase 1 — Brief (parallel Sonnet reads)**
+
+Spawn one Sonnet domain agent per subsystem. Keep them alive across all three
+phases. Each agent reads its `CLAUDE.md` + `function_signatures.md` + key
+files and returns a **domain brief**: file map, component tree, data model,
+existing patterns, and relevant interfaces. All domain agents run in parallel.
+
+**Phase 2 — Plan (Opus reasoning gate)**
+
+Spawn Opus phase leads — one per logical phase. Each lead receives the relevant
+domain briefs plus the task list for its phase. It produces a detailed
+**implementation plan per item** — decisions, interfaces, sequencing, edge
+cases — not code. Phase leads with no dependency overlap run in parallel.
+
+> **Stop here.** Present the plans to the user for review before Phase 3.
+> The Opus planning layer is a deliberate human gate: every design decision
+> is reviewed by the strongest available model before bulk writing begins.
+> Do not proceed to Phase 3 without explicit user approval.
+
+If a phase lead needs a detail the brief doesn't cover, route the question to
+the cached domain agent and relay the answer back. This should be the
+exception, not the norm.
+
+**Phase 3 — Execute (parallel Sonnet writes)**
+
+Once the user approves the plans, dispatch each domain agent its relevant
+plan items. Each agent writes only within its own subsystem — natural domain
+isolation prevents cross-agent file conflicts. Domain agents already hold
+their subsystem context from Phase 1; they do not re-read files.
+
+The orchestrator collects completion reports and handles cross-domain
+sequencing if phase dependencies exist (use the parallel output collation
+protocol above for any shared output files).
+
+Why this works:
+- Sonnet agents pay for their file reads once across all three phases
+- Opus reasoning is confined to design — it never touches files
+- The human review gate separates "is this the right plan?" from "execute it"
+- Domain isolation means agents write in parallel without conflicts
+- Commodity Sonnet execution costs scale with volume, not complexity
+
+Trigger this pattern when you recognise a large multi-phase task. Propose it
+proactively — the user does not need to ask.
+
 ### Code-writing agent requirements
 
 **Any agent that writes code must be the primary subagent for that component.**

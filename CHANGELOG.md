@@ -10,6 +10,31 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.11.0] — 2026-03-12
+
+### Changed
+- `template/CLAUDE.md` — Expanded "Large task planning protocol" into a full
+  three-phase "Large task planning and execution protocol". Phase 3 (Execute)
+  dispatches the same warm Sonnet domain agents from Phase 1 to carry out
+  approved implementation plans within their own subsystems. Adds an explicit
+  human review gate between Phase 2 and Phase 3: Opus-generated plans must be
+  approved before bulk writing begins. Clarifies that Opus reasoning is
+  confined to design, Sonnet handles volume, and domain isolation prevents
+  cross-agent file conflicts.
+
+---
+
+## [1.10.0] — 2026-03-12
+
+### Added
+- `template/CLAUDE.md` — "Large Task Planning Protocol" section under Delegation
+  rules. Describes the domain-brief pattern: spawn parallel Sonnet domain agents
+  to produce focused briefs per subsystem, then feed those briefs to Opus phase
+  leads for implementation planning. Eliminates redundant file reads across
+  phases and allows phase leads to run in parallel where dependencies permit.
+
+---
+
 ## [1.9.0] — 2026-03-11
 
 ### Changed
