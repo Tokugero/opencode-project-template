@@ -10,6 +10,18 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.12.0] — 2026-03-12
+
+### Changed
+- `template/CLAUDE.md` — Strengthened Phase 1 brief spec: briefs must be
+  self-sufficient (exact file paths, type definitions, method signatures,
+  field names, endpoint shapes, gaps). Strengthened Phase 2: Opus phase leads
+  must not read source files — briefs are the source of truth. Added
+  diagnostic signal: if Opus reads files, Phase 1 briefs were too shallow.
+  Updated "why this works" rationale to reflect single-read principle.
+
+---
+
 ## [1.11.0] — 2026-03-12
 
 ### Changed

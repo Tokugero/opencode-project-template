@@ -137,8 +137,12 @@ subsystems. The goal is to concentrate expensive reasoning where it matters
 
 Spawn one Sonnet domain agent per subsystem. Keep them alive across all three
 phases. Each agent reads its `CLAUDE.md` + `function_signatures.md` + key
-files and returns a **domain brief**: file map, component tree, data model,
-existing patterns, and relevant interfaces. All domain agents run in parallel.
+files and returns a **domain brief**. The brief must be self-sufficient — it
+is the only source of truth Opus phase leads will use. Include: exact file
+paths, type definitions, method and function signatures, field names, endpoint
+shapes, existing patterns, and any identified gaps or ambiguities. If the
+brief omits a detail, Opus will plan around a blind spot. All domain agents
+run in parallel.
 
 **Phase 2 — Plan (Opus reasoning gate)**
 
@@ -147,14 +151,21 @@ domain briefs plus the task list for its phase. It produces a detailed
 **implementation plan per item** — decisions, interfaces, sequencing, edge
 cases — not code. Phase leads with no dependency overlap run in parallel.
 
+> **Opus phase leads must not read source files.** The domain briefs are the
+> source of truth. Reading source again wastes tokens re-discovering what the
+> briefs already document and pollutes the Opus context window with file
+> content instead of design reasoning. If a brief is missing a detail, route
+> a targeted question to the cached domain agent — do not read files directly.
+
 > **Stop here.** Present the plans to the user for review before Phase 3.
 > The Opus planning layer is a deliberate human gate: every design decision
 > is reviewed by the strongest available model before bulk writing begins.
 > Do not proceed to Phase 3 without explicit user approval.
 
-If a phase lead needs a detail the brief doesn't cover, route the question to
-the cached domain agent and relay the answer back. This should be the
-exception, not the norm.
+If a phase lead needs a detail the brief doesn't cover, send a targeted
+question to the cached domain agent and relay the answer back. This should be
+the exception; if it happens repeatedly, the Phase 1 brief spec was too
+shallow — improve it for the next run.
 
 **Phase 3 — Execute (parallel Sonnet writes)**
 
@@ -168,11 +179,12 @@ sequencing if phase dependencies exist (use the parallel output collation
 protocol above for any shared output files).
 
 Why this works:
-- Sonnet agents pay for their file reads once across all three phases
-- Opus reasoning is confined to design — it never touches files
+- Source files are read exactly once (Phase 1 Sonnet) and never again
+- Opus reasoning is confined to design — briefs in, plans out, no file I/O
 - The human review gate separates "is this the right plan?" from "execute it"
 - Domain isolation means agents write in parallel without conflicts
 - Commodity Sonnet execution costs scale with volume, not complexity
+- If Opus reads source files it's a signal the Phase 1 briefs were too shallow
 
 Trigger this pattern when you recognise a large multi-phase task. Propose it
 proactively — the user does not need to ask.
