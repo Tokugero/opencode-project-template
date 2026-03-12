@@ -10,6 +10,26 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [1.13.0] — 2026-03-12
+
+### Added
+- `template/.claude/skills/signatures-update/SKILL.md` — new skill for
+  refreshing `function_signatures.md` and `SUMMARY.md`. Diff mode (default)
+  uses mtime to find only files modified since the last index write and
+  spawns parallel Sonnet agents per dirty subsystem. Regeneration mode does
+  a full scrape. Includes dry-run summary and confirmation gate for large
+  updates. Follows with a single consolidation agent that rewrites the
+  project-level `SUMMARY.md`.
+
+### Changed
+- `template/CLAUDE.md` — Refined Phase 2 Opus source-read prohibition.
+  `function_signatures.md` and `SUMMARY.md` are now explicitly permitted as
+  lightweight orientation references. Full source file reads remain
+  prohibited. Rationale added: project may be large; indexes exist for
+  this purpose.
+
+---
+
 ## [1.12.0] — 2026-03-12
 
 ### Changed

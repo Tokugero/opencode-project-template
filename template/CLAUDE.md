@@ -152,9 +152,13 @@ domain briefs plus the task list for its phase. It produces a detailed
 cases — not code. Phase leads with no dependency overlap run in parallel.
 
 > **Opus phase leads must not read source files.** The domain briefs are the
-> source of truth. Reading source again wastes tokens re-discovering what the
-> briefs already document and pollutes the Opus context window with file
-> content instead of design reasoning. If a brief is missing a detail, route
+> source of truth for task-relevant context. If orientation is needed,
+> `function_signatures.md` and `SUMMARY.md` are acceptable lightweight
+> references — they are intentionally concise indexes maintained for exactly
+> this purpose. Reading full source files is not acceptable at this phase:
+> the project may be large, the relevant context is already in the briefs,
+> and source reads pollute the Opus context window with implementation detail
+> instead of design reasoning. If a brief is missing a specific detail, route
 > a targeted question to the cached domain agent — do not read files directly.
 
 > **Stop here.** Present the plans to the user for review before Phase 3.
