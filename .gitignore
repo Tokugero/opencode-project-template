@@ -7,3 +7,5 @@
 
 # Local template tracking — machine-specific, never committed
 .template-local
+
+docs/.tmp
