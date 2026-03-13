@@ -16,7 +16,6 @@ These files are deployed once per workstation to `~/.claude/`. They are
 | `security/owasp-*.md` | `~/.claude/security/owasp-*.md` | Cached OWASP Top 10 reference docs (Web, API, LLM). Read by security-audit agent at startup. Update manually when OWASP publishes new versions. |
 | `skills/sdlc-audit/` | `~/.claude/skills/sdlc-audit/` | Repeatable codebase audit & fix cycle using parallel agent teams. Phases: audit, consolidate, fix, validate. Output stays in docs/.tmp/. |
 | `skills/sdlc-review/` | `~/.claude/skills/sdlc-review/` | Read-only codebase review using parallel audit agents. Produces consolidated findings in docs/.tmp/ without code changes. |
-| `skills/git-flow/` | `~/.claude/skills/git-flow/` | Example skill: git operations. **Optional** — Claude Code has built-in git workflow. Install only if you want to override the default with the two-phase push protocol. |
 
 ---
 
@@ -37,7 +36,6 @@ cp global-config/claudecode/security/*.md ~/.claude/security/
 mkdir -p ~/.claude/skills
 cp -r global-config/claudecode/skills/sdlc-audit ~/.claude/skills/
 cp -r global-config/claudecode/skills/sdlc-review ~/.claude/skills/
-cp -r global-config/claudecode/skills/git-flow ~/.claude/skills/  # optional
 ```
 
 ### Via nix home-manager (recommended)
@@ -59,7 +57,6 @@ programs.claude-code = {
   skills = {
     sdlc-audit = ./claudecode/skills/sdlc-audit;
     sdlc-review = ./claudecode/skills/sdlc-review;
-    # git-flow = ./claudecode/skills/git-flow;  # optional — Claude Code has built-in git
   };
 };
 
@@ -109,21 +106,30 @@ home.sessionVariables = {
 
 ---
 
+## Companion tools
+
+These tools complement Claude Code but are deployed separately:
+
+| Tool | Purpose |
+|------|---------|
+| **agency-agents** | Global git workflow agent for OpenCode. Deploy to `~/.config/opencode/agents/`. See the agency-agents repository for installation. |
+| **impeccable** | Opinionated code quality enforcer. Runs as a pre-commit hook or CI step. See the impeccable repository for installation. |
+
+---
+
 ## Design notes
 
-### Why no git-flow agent?
+### Why no git agent?
 
-OpenCode's `git-flow` agent is replaced by **two things** in Claude Code:
+Claude Code natively understands git and follows `includeGitInstructions`
+conventions without a dedicated agent.
 
-1. **Built-in git workflow** — Claude Code natively understands git and follows
-   `includeGitInstructions` conventions without a dedicated agent.
-2. **`CLAUDE.md` rules** — The two-phase push protocol and conventional commits
-   format from the original agent are captured as global rules in
-   `global-config/claudecode/CLAUDE.md`, loaded into every session.
+The two-phase push protocol and conventional commits format are captured as
+global rules in `global-config/claudecode/CLAUDE.md`, loaded into every
+session automatically.
 
-The `skills/git-flow/` skill is provided as an **example of the skill pattern**
-and as an optional override if you want explicit `/git-flow` invocation
-instead of ambient behavior.
+For OpenCode, git workflow is handled by **agency-agents** (see Companion
+tools above).
 
 ### Skills vs. commands
 
@@ -143,7 +149,3 @@ The **primary recommended skills** in this repo are `sdlc-audit` and
   findings, applies fixes on a dedicated branch, and validates the results.
   Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (see Recommended
   environment above).
-
-The `git-flow` skill remains **optional** — it demonstrates the skill pattern
-and provides an explicit `/git-flow` command, but Claude Code's built-in git
-workflow covers the same ground for most users.

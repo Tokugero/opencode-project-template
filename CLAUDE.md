@@ -19,21 +19,20 @@ opencode-project-template/
 ├── README.md                     ← human quick-start and LLM setup instructions
 ├── CHANGELOG.md                  ← template version history
 ├── .template-version             ← current semver
+├── docs/
+│   └── migration-v2.md           ← 1.x → 2.0.0 upgrade guide
 ├── global-config/
 │   ├── agents/                   ← OpenCode global agents (deploy to ~/.config/opencode/agents/)
-│   │   ├── README.md
-│   │   └── git-flow.md
+│   │   └── README.md
 │   └── claudecode/               ← Claude Code global config (deploy to ~/.claude/)
 │       ├── README.md             ← install instructions
 │       ├── CLAUDE.md             ← global git rules → deploy to ~/.claude/CLAUDE.md
-│       └── skills/
-│           └── git-flow/         ← example skill (optional; Claude Code has built-in git)
-│               ├── SKILL.md
-│               └── checklist.md
+│       └── skills/               ← Claude Code skills (deploy to ~/.claude/skills/)
 └── template/                     ← copy this into consuming projects
     ├── AGENTS.md                 ← OpenCode orchestrator dispatch table
     ├── CLAUDE.md                 ← Claude Code orchestrator + dispatch table
-    ├── SUMMARY.md                ← subsystem context stub
+    ├── .abstract.md              ← L0 ultra-concise project map (~100 tokens)
+    ├── .overview.md              ← L1 subsystem context stub
     ├── protocols.md              ← secrets, permission gates, code style
     ├── opencode.json             ← OpenCode config stub
     ├── .opencode/agents/         ← OpenCode agent templates

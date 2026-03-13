@@ -7,8 +7,8 @@ It describes how the repo is structured, which subagents handle which concerns,
 and the safety gates that require human approval.
 
 Subagents working inside a specific subsystem should read their own
-`SUMMARY.md` or agent file first. Read this file only when cross-cutting
-coordination is needed.
+`.abstract.md` (L0) and `.overview.md` (L1), or agent file first. Read this
+file only when cross-cutting coordination is needed.
 
 > **Protocols and history are in separate files to keep this prompt lean:**
 > - Secrets, permission gates, code style, helpful commands → `protocols.md`
@@ -31,7 +31,8 @@ coordination is needed.
 <project>/
 ├── opencode.json               <- MCP server config + default_agent
 ├── AGENTS.md                   <- THIS FILE — orchestration dispatch table
-├── SUMMARY.md                  <- project-wide context for agents (read this first)
+├── .abstract.md                <- project-wide context summary (read this first)
+├── .overview.md                <- full file/component map (orient before diving in)
 ├── protocols.md                <- secrets, permission gates, code style, helpful commands
 ├── CHANGELOG.md                <- template version history
 ├── .template-local             <- gitignored: local template-version + template-path
@@ -48,8 +49,8 @@ coordination is needed.
 │   └── sre-todos.md            <- deferred SRE findings
 │
 └── <subsystem>/                <- one directory per major subsystem
-    ├── SUMMARY.md              <- subsystem context for subagents
-    └── function_signature.md   <- file/component map; owned by subsystem agent
+    ├── .abstract.md            <- subsystem context summary (L0)
+    └── .overview.md            <- file/component map (L1); owned by subsystem agent
 ```
 
 ---
@@ -71,7 +72,6 @@ coordination is needed.
 | **<project>-orchestrator** | `.opencode/agents/<project>-orchestrator.md` | Primary agent — delegates all work | Always active (set as `default_agent` in `opencode.json`) |
 | **<project>-sre** | `.opencode/agents/<project>-sre.md` | Read-only runtime investigation | Crashes, failures, metrics questions, resource pressure |
 | **<project>-<role>** | `.opencode/agents/<project>-<role>.md` | <description> | <trigger> |
-| **git-flow** | (global agent) | Git operations | Commits, branches, PRs, git history queries |
 
 ### Orchestrator — primary agent
 
@@ -95,12 +95,6 @@ queries service endpoints and observability tools. It does NOT make changes.
 - Performance degradation
 - Any question answerable from logs, metrics, or health endpoints
 
-### git-flow agent — all git operations
-
-`@git-flow` is the **only agent that touches git**. Always delegate to
-`@git-flow` for commits, branches, PRs, and git history queries. The
-orchestrator must never run any git command directly.
-
 ---
 
 ## Delegation Rules
@@ -108,8 +102,8 @@ orchestrator must never run any git command directly.
 1. Top-level agent reads this file and identifies which subagent(s) need to act.
 2. For runtime issues, delegate to `@<project>-sre` first.
 3. Subagents are given a task description and told to read their own agent file.
-4. Subagents read `<subsystem>/SUMMARY.md` then `<subsystem>/function_signature.md`
-   before touching any files — this is how they navigate without reading all source.
+4. Subagents follow L0/L1/L2 protocol: read `.abstract.md` (scan), `.overview.md`
+   (orient), source files only as needed — this is how they navigate without reading all source.
 5. Subagents operate only within their own subtree unless the task explicitly
    requires cross-cutting changes.
 6. Cross-cutting changes are coordinated by the top-level agent, delegating to

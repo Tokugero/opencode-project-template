@@ -10,6 +10,34 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [2.0.0] — 2026-03-13
+
+### Breaking
+- `SUMMARY.md` renamed to `.overview.md` (L1 context) — all agent references updated
+- `function_signature.md` retired — contents merged into `.overview.md` component table
+- `signatures-update` skill renamed to `context-update`
+- `git-flow` agent and skill removed from global-config
+
+### Added
+- `.abstract.md` (L0) — ultra-concise project map (~100 tokens)
+- L0/L1/L2 tiered context loading protocol in all agent definitions
+- Anti-patterns section in all agent definitions
+- AST skeleton extraction in context-update skill (Python, JS/TS, Rust, Go, Java, C/C++)
+- Companion tools references (agency-agents, impeccable) in global-config docs
+
+### Changed
+- All agent definitions updated to L0/L1/L2 context loading protocol
+- Planning protocol phases reference .abstract.md and .overview.md
+- Orchestrator dispatch tables updated for new file naming
+- context-update skill produces both .overview.md (L1) and .abstract.md (L0)
+
+### Removed
+- `global-config/agents/git-flow.md` — git workflow handled by agency-agents
+- `global-config/claudecode/skills/git-flow/` — replaced by built-in git + agency-agents
+- git-flow references from all template files
+
+---
+
 ## [1.13.0] — 2026-03-12
 
 ### Added

@@ -18,7 +18,7 @@ Global agents are registered in your user-level `opencode.json` and are
 available in every opencode session regardless of which project you are in.
 
 Typical global agents:
-- **git-flow** — handles commits, branches, and PRs across all repos
+- **agency-agents** — handles commits, branches, and PRs across all repos (install separately)
 - **scaffolding agents** — initialize new projects from templates
 
 ---
@@ -37,7 +37,7 @@ Then register each agent in your `~/.config/opencode/opencode.json`:
 ```json
 {
   "agent": {
-    "git-flow": {
+    "<agent-name>": {
       "mode": "subagent",
       "permission": { "bash": "ask" }
     }
@@ -61,4 +61,4 @@ See the example in `agents/README.md` for the full nix snippet.
 | Path | Description |
 |------|-------------|
 | `agents/README.md` | Per-agent installation instructions and nix wiring |
-| `agents/git-flow.md` | Global git flow agent — commits, branches, PRs |
+| `claudecode/README.md` | Claude Code global config installation instructions |

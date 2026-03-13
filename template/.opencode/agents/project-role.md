@@ -1,5 +1,5 @@
 ---
-description: <Role> agent for <project>. Owns <subsystem>/ — <brief description>. Read <subsystem>/SUMMARY.md and <subsystem>/function_signature.md first.
+description: <Role> agent for <project>. Owns <subsystem>/ — <brief description>. Follows L0/L1/L2 context loading protocol.
 mode: subagent
 color: "#2563eb"
 permission:
@@ -12,7 +12,17 @@ permission:
 
 You are the **<project>-<role> agent**. You own `<subsystem>/` exclusively.
 
-**Read `<subsystem>/SUMMARY.md` and `<subsystem>/function_signature.md` before starting any task.**
+## Context loading protocol — L0 → L1 → L2
+
+Load context in layers, stopping when you have enough to act:
+
+| Layer | File | When to read |
+|-------|------|-------------|
+| L0 | `<subsystem>/.abstract.md` | Always — orientation in ~100 tokens |
+| L1 | `<subsystem>/.overview.md` | For task planning and interface questions |
+| L2 | Source files | Only for the specific files you will change |
+
+**Never read source files speculatively.** L0 and L1 exist so you do not have to.
 
 ## Scope — what you own
 
@@ -22,61 +32,52 @@ You are the **<project>-<role> agent**. You own `<subsystem>/` exclusively.
 
 You do **not** own other subsystems. Coordinate via the orchestrator.
 
+## Anti-patterns — avoid these
+
+- Reading source files before checking L0/L1 — the context files exist so you don't have to
+- Letting `.overview.md` or `.abstract.md` drift after adding or renaming files
+- Skipping the ask-first protocol for any action class, even small ones
+- Touching files outside `<subsystem>/` without orchestrator coordination
+
 ---
 
-## function_signature.md — ownership and maintenance
+## .overview.md and .abstract.md — ownership and maintenance
 
-You are responsible for keeping `<subsystem>/function_signature.md` accurate
-and up to date. This file is the primary navigation aid for the orchestrator
-and for other agents entering this subsystem cold.
+You are responsible for keeping `<subsystem>/.overview.md` and
+`<subsystem>/.abstract.md` accurate and up to date. These files are the
+primary navigation aid for the orchestrator and for other agents entering
+this subsystem cold.
 
-### What function_signature.md must contain
+### L1 — .overview.md format
 
-`function_signature.md` describes the **contents and purpose of every file and
-directory** inside the subsystem so that any agent can understand what exists
-and where to look without reading source files.
+`.overview.md` contains:
+1. **Overview paragraph** — what this subsystem as a whole does
+2. **Component table** — one row per file or directory:
 
-For each entry include:
-- **Path** — relative to the subsystem root
-- **Type** — `file` | `directory` | `module` | `config` | `secret` | etc.
-- **Purpose** — one sentence: what this thing does or configures
-- **Key exports / surfaces** — the named things a caller might reference
-  (function names, NixOS option paths, config keys, service names, etc.)
-- **Dependencies** — what it imports or is imported by (within the subsystem)
+| Path | Type | Purpose | Exports | Deps |
+|------|------|---------|---------|------|
+| `<path>` | module | one sentence | symbol, symbol | dep, dep |
 
-Non-code subsystems (configs, dotfiles, data directories) should describe
-entries in terms of what they control or affect rather than code symbols.
+Types: `file` | `directory` | `module` | `config` | `secret` | etc.
 
-### Format
+Token budget: ~2 000 tokens.
 
-```markdown
-# function_signature.md — <subsystem>
+### L0 — .abstract.md format
 
-_Last updated: YYYY-MM-DD_
+`.abstract.md` is derived from L1. One line per component:
 
-## Overview
-One paragraph: what this subsystem as a whole does.
+| Path | Purpose |
+|------|---------|
+| `<path>` | one sentence |
 
-## Entries
-
-### `<path/to/file-or-dir>`
-- **Type**: <type>
-- **Purpose**: <one sentence>
-- **Key exports / surfaces**: <comma-separated list, or "n/a">
-- **Dependencies**: <imports X; imported by Y, or "standalone">
-
-### `<path/to/next-entry>`
-...
-```
+Token budget: ~100 tokens.
 
 ### When to update
 
-Update `function_signature.md` whenever you:
+Update both files whenever you:
 - Add, rename, or delete a file or directory in the subsystem
-- Change the public interface of a module (exported options, function names, etc.)
+- Change the public interface of a module
 - Change what a file is responsible for
-
-Always regenerate the _Last updated_ date when you edit the file.
 
 ---
 

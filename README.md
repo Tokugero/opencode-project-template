@@ -49,8 +49,9 @@ contains parallel configuration for each tool.
    ```
    Then open the project in opencode and ask it to fill in the placeholders.
 
-3. **Install the global git agent once per machine** — see
-   [`global-config/agents/README.md`](global-config/agents/README.md).
+3. **Deploy global config once per machine** — see
+   [`global-config/agents/README.md`](global-config/agents/README.md) for
+   OpenCode agent deployment and the agency-agents companion tool for git workflow.
 
 ### Both tools
 
@@ -70,17 +71,16 @@ opencode-project-template/
 ├── .gitignore                  ← ignores for the template repo itself
 ├── global-config/              ← machine-scoped config (deploy once, never copy to projects)
 │   ├── agents/                 ← OpenCode global agents
-│   │   ├── README.md           ← install instructions + nix wiring
-│   │   └── git-flow.md         ← global git operations agent
+│   │   └── README.md           ← install instructions + nix wiring
 │   └── claudecode/             ← Claude Code global config
 │       ├── README.md           ← install instructions + nix wiring
 │       ├── CLAUDE.md           ← global git rules → deploy to ~/.claude/CLAUDE.md
-│       └── skills/
-│           └── git-flow/       ← example skill (optional; Claude Code has built-in git)
+│       └── skills/             ← Claude Code skills (deploy to ~/.claude/skills/)
 └── template/                   ← COPY THIS into your project (like src/)
     ├── AGENTS.md               ← OpenCode orchestrator dispatch table
     ├── CLAUDE.md               ← Claude Code orchestrator + dispatch table
-    ├── SUMMARY.md              ← subsystem SUMMARY stub (one copy per subsystem)
+    ├── .abstract.md            ← L0 ultra-concise project map (~100 tokens)
+    ├── .overview.md            ← L1 subsystem context stub (one copy per subsystem)
     ├── .envrc                  ← direnv config: `use flake` for Nix dev shell activation
     ├── opencode.json           ← OpenCode: MCP config + default_agent stub
     ├── .mcp.json               ← Claude Code: MCP server config (stdio + http examples)
@@ -118,6 +118,13 @@ This repo is versioned with semver. Consuming projects pin the version in
 3. Apply the **Added** / **Changed** / **Removed** items to your project files.
 4. Update `template-version` in `.template-local` and add a row to your `AGENTS.md` Session Log.
 
+**Major version upgrades** involve breaking changes and file renames. See the
+migration guides in `docs/` for step-by-step instructions:
+
+- [1.x → 2.0.0](docs/migration-v2.md) — `SUMMARY.md` → `.overview.md`,
+  `function_signature.md` merged into `.overview.md`, `.abstract.md` added,
+  git-flow removed
+
 ---
 
 ## What each file is for
@@ -129,7 +136,8 @@ This repo is versioned with semver. Consuming projects pin the version in
 | `template/AGENTS.md` | OpenCode | Yes — customise | Orchestrator dispatch table read every session. |
 | `template/CLAUDE.md` | Claude Code | Yes — customise | Orchestrator instructions + dispatch table (merges AGENTS.md role). |
 | `template/.envrc` | Both | Yes — one per flake.nix | direnv config: `use flake` activates the Nix dev shell. Copy to project root and each subsystem that has its own `flake.nix`. Requires `direnv` + `nix-direnv` on the machine. |
-| `template/SUMMARY.md` | Both | Yes — one per subsystem | Subsystem context for subagents. |
+| `template/.abstract.md` | Both | Yes — one per project | L0 ultra-concise project map (~100 tokens). Loaded first by every agent. |
+| `template/.overview.md` | Both | Yes — one per subsystem | L1 subsystem context: overview, component table, endpoints, dev commands. |
 | `template/opencode.json` | OpenCode | Yes — customise | MCP server config + `default_agent`. |
 | `template/.mcp.json` | Claude Code | Yes — customise | MCP server config stub; shows both `stdio` and `http` server types. |
 | `template/.claude/settings.json` | Claude Code | Yes — customise | Session model + permissions stub. MCP servers go in `.mcp.json`. |
@@ -147,9 +155,9 @@ This repo is versioned with semver. Consuming projects pin the version in
 
 | File / dir | Tool | Deploy to | Purpose |
 |-----------|------|-----------|---------|
-| `global-config/agents/git-flow.md` | OpenCode | `~/.config/opencode/agents/` | Global git operations agent. |
 | `global-config/claudecode/CLAUDE.md` | Claude Code | `~/.claude/CLAUDE.md` | Global git workflow rules (two-phase push, conventional commits). |
-| `global-config/claudecode/skills/git-flow/` | Claude Code | `~/.claude/skills/git-flow/` | Example skill demonstrating the skill pattern. Optional — Claude Code has built-in git workflow. |
+| `global-config/claudecode/skills/sdlc-audit/` | Claude Code | `~/.claude/skills/sdlc-audit/` | Repeatable audit & fix cycle using parallel agent teams. |
+| `global-config/claudecode/skills/sdlc-review/` | Claude Code | `~/.claude/skills/sdlc-review/` | Read-only codebase review. Produces consolidated findings without code changes. |
 
 ### Template repo infrastructure (never copy)
 
@@ -174,8 +182,7 @@ Orchestrator  (mode: primary — set as default_agent in opencode.json)
   │  reads AGENTS.md every session
   │
   ├── @<project>-sre      cross-system observer; read-only
-  ├── @<project>-<role>   owns one subsystem directory
-  └── @git-flow           global; handles all git operations
+  └── @<project>-<role>   owns one subsystem directory
 ```
 
 ### Claude Code
@@ -189,7 +196,6 @@ Main session  (reads CLAUDE.md every session — IS the orchestrator)
   ├── @<project>-sre      cross-system observer; read-only
   ├── @<project>-<role>   owns one subsystem directory
   └── built-in git        git workflow handled natively
-      (or /git-flow skill if you want explicit invocation)
 ```
 
 ### Orchestrator
@@ -201,31 +207,20 @@ git commands itself.
 
 ### SRE agent
 
-The SRE agent is a cross-system observer. It reads every subsystem's
-`SUMMARY.md` and `function_signature.md` to build a full picture of the
-system, then queries live state to find what is actually happening. It
-correlates across subsystems, recommends fixes, and does **not** make
-changes. Its capability grows automatically as subsystem docs improve.
+The SRE agent is a cross-system observer. It loads `.abstract.md` (L0) for a
+quick project map, then reads each subsystem's `.overview.md` (L1) to build a
+full picture of the system. It queries live state to find what is actually
+happening, correlates across subsystems, recommends fixes, and does **not**
+make changes. Its capability grows automatically as subsystem docs improve.
 
 ### Role agents
 
 Each major subsystem directory gets its own role agent. The agent:
 - Owns exactly one directory
-- Reads `SUMMARY.md` and `function_signature.md` before doing anything
-- Keeps `function_signature.md` up to date as it works
+- Loads `.abstract.md` (L0), then `<subsystem>/.overview.md` (L1) before acting
+- Keeps `.overview.md` up to date as it works
 - Uses an ask-first protocol before executing any action class for the first time
 - Writes `in-progress.md` at the start of any multi-step task (gitignored)
-
-### git-flow
-
-**OpenCode:** A global agent deployed to `~/.config/opencode/agents/git-flow.md`.
-The orchestrator routes all git operations here.
-
-**Claude Code:** Git workflow is built-in. The two-phase push protocol and
-conventional commits rules from the original agent live in
-`global-config/claudecode/CLAUDE.md` (deployed to `~/.claude/CLAUDE.md`).
-The `global-config/claudecode/skills/git-flow/` skill is an optional override
-that also demonstrates the **skill pattern** for project-specific skills.
 
 ---
 ## LLM setup instructions
@@ -324,14 +319,22 @@ Set `default_agent` to match your orchestrator filename (without `.md`).
 
 #### Subsystem context
 
-`template/SUMMARY.md` — create one copy per subsystem directory as
-`<subsystem>/SUMMARY.md`:
+**Project map:** `template/.abstract.md` → `.abstract.md` (one per project, at the root)
+
+| Placeholder | Replace with |
+|------------|-------------|
+| `<project-name>` | actual project name |
+| Stack line | language, framework, key dependencies |
+| Subsystem list | one line per subsystem with directory path |
+
+**Subsystem overviews:** `template/.overview.md` — create one copy per subsystem directory as
+`<subsystem>/.overview.md`:
 
 | Placeholder | Replace with |
 |------------|-------------|
 | `<subsystem>` in the title | directory name |
 | Body | one paragraph describing the subsystem |
-| Component table | actual files/components |
+| Component table | actual files/components with types and dependencies |
 | Service endpoints table | real URLs or "n/a" |
 | Dev workflow commands | real commands for this subsystem |
 
@@ -364,25 +367,13 @@ Copy `template/.claude/skills/example-skill/` as a starting point for any
 project-specific skill. Rename the directory and update `SKILL.md` frontmatter.
 If no custom skills are needed, do not copy this directory.
 
-### Step 3 — create `function_signature.md` stubs
+### Step 3 — verify context files
 
-For each subsystem that has a role agent, create
-`<subsystem>/function_signature.md` with this stub:
-
-```markdown
-# function_signature.md — <subsystem>
-
-_Last updated: YYYY-MM-DD_
-
-## Overview
-<!-- One paragraph: what this subsystem as a whole does. -->
-
-## Entries
-<!-- The <project>-<role> agent will populate this as it works. -->
-```
-
-The role agent fills this in as it explores the subsystem. Do not attempt
-to populate it yourself unless you have already read all the files.
+Confirm that `.abstract.md` exists at the project root and each subsystem
+directory has `.overview.md`. These were created in Step 2. The component
+table in each `.overview.md` starts sparse — the role agent fills it in as
+it explores the subsystem. Do not attempt to populate it yourself unless
+you have already read all the files.
 
 ### Step 4 — do NOT copy
 
@@ -414,5 +405,5 @@ Report to the human:
 3. Whether global config is deployed on this machine:
    - Claude Code: `ls ~/.claude/CLAUDE.md` — if not, print install instructions
      from `global-config/claudecode/README.md`
-   - OpenCode: `ls ~/.config/opencode/agents/git-flow.md` — if not, print
-     install instructions from `global-config/agents/README.md`
+   - OpenCode: `ls ~/.config/opencode/agents/` — if no agents installed, point
+     to `global-config/agents/README.md` and the agency-agents companion tool

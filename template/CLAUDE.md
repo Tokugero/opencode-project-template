@@ -17,7 +17,8 @@ correct subagent, and **never edit files or run git commands directly**.
 ```
 <project>/
 ├── CLAUDE.md                    ← THIS FILE — orchestration dispatch table
-├── SUMMARY.md                   ← project-wide context (read this first)
+├── .abstract.md                 ← project-wide context summary (read this first)
+├── .overview.md                 ← full file/component map (orient before diving in)
 ├── protocols.md                 ← secrets, permission gates, code style
 ├── .envrc                       ← direnv config: activates flake.nix dev shell
 ├── .claude/
@@ -32,8 +33,8 @@ correct subagent, and **never edit files or run git commands directly**.
 │   └── sre-todos.md             ← deferred SRE findings
 └── <subsystem>/                 ← one directory per major subsystem
     ├── .envrc                   ← direnv config (if subsystem has its own flake.nix)
-    ├── SUMMARY.md               ← subsystem context for subagents
-    └── function_signature.md    ← file/component map; owned by subsystem agent
+    ├── .abstract.md             ← subsystem context summary (L0)
+    └── .overview.md             ← file/component map (L1); owned by subsystem agent
 ```
 
 ---
@@ -136,8 +137,8 @@ subsystems. The goal is to concentrate expensive reasoning where it matters
 **Phase 1 — Brief (parallel Sonnet reads)**
 
 Spawn one Sonnet domain agent per subsystem. Keep them alive across all three
-phases. Each agent reads its `CLAUDE.md` + `function_signatures.md` + key
-files and returns a **domain brief**. The brief must be self-sufficient — it
+phases. Each agent reads `.abstract.md` (L0), `.overview.md` (L1), then L2 source
+files the task requires and returns a **domain brief**. The brief must be self-sufficient — it
 is the only source of truth Opus phase leads will use. Include: exact file
 paths, type definitions, method and function signatures, field names, endpoint
 shapes, existing patterns, and any identified gaps or ambiguities. If the
@@ -153,7 +154,7 @@ cases — not code. Phase leads with no dependency overlap run in parallel.
 
 > **Opus phase leads must not read source files.** The domain briefs are the
 > source of truth for task-relevant context. If orientation is needed,
-> `function_signatures.md` and `SUMMARY.md` are acceptable lightweight
+> `.overview.md` (L1) and `.abstract.md` (L0) are acceptable lightweight
 > references — they are intentionally concise indexes maintained for exactly
 > this purpose. Reading full source files is not acceptable at this phase:
 > the project may be large, the relevant context is already in the briefs,
@@ -276,7 +277,7 @@ of how small or obvious the change seems.
 Even a one-line fix must be delegated to the owning subagent because
 subagents carry workflow responsibilities that the orchestrator does not:
 
-- **`function_signature.md` maintenance** — subagents update the file/component
+- **`.overview.md` maintenance** — subagents update the file/component
   map whenever they add, rename, or delete files. Skipping them means the map
   drifts from reality.
 - **`in-progress.md` tracking** — subagents write progress state so interrupted

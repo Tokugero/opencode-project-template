@@ -20,7 +20,7 @@ Add each agent to `~/.config/opencode/opencode.json` under `agent`:
 ```json
 {
   "agent": {
-    "git-flow": {
+    "<agent-name>": {
       "mode": "subagent",
       "permission": { "bash": "ask" }
     }
@@ -36,15 +36,13 @@ In your opencode home-manager module (e.g. `home/dev/opencode.nix`):
 programs.opencode = {
   enable = true;
 
-  # Deploy the agent file to the opencode config directory
   agents = {
-    git-flow = ./agents/git-flow.md;
+    <agent-name> = ./agents/<agent-name>.md;
   };
 
-  # Register the agent so opencode knows about it
   settings = {
     agent = {
-      git-flow = {
+      <agent-name> = {
         mode = "subagent";
         permission = {
           bash = "ask";
@@ -59,29 +57,10 @@ programs.opencode = {
 
 ## Agents in this directory
 
-### `git-flow.md`
+This directory ships no agents. Add your own project-specific agents here
+and follow the installation steps above to deploy them.
 
-Handles all git operations across any project:
-- Stages and commits with conventional commit messages
-- Creates and manages branches
-- Opens pull requests via `gh`
-- Two-phase push protocol — always summarises before pushing, requires
-  explicit confirmation before `git push`
-- Hard deny on `git push --force` to main/master
-
-**Permissions (as shipped):**
-| Command | Permission |
-|---------|-----------|
-| `git status`, `git diff`, `git log`, `git branch` | allow |
-| `git add *` | allow |
-| `git commit *` | ask |
-| `git push *` | deny (requires human to run) |
-| `git pull *` | allow |
-| `git checkout *`, `git switch *` | allow |
-| `git merge *` | ask |
-| `gh pr create *` | deny |
-| `gh pr *`, `gh issue *` | ask |
-| everything else | ask |
-
-Adjust the `permission.bash` map in your `opencode.json` or nix config to
-suit your comfort level (e.g. change `git push *` to `ask` once you trust it).
+**Git workflow** is handled by **agency-agents** — a companion tool deployed
+separately. Install agency-agents and deploy it to
+`~/.config/opencode/agents/`. See the agency-agents repository for
+installation instructions.

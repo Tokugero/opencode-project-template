@@ -50,7 +50,10 @@ The only files you interact with directly:
 |----------|-------|
 | `@<project>-sre` | Runtime observability — read-only |
 | `@<project>-<role>` | <!-- subsystem description --> |
-| `@git-flow` | All git operations across all projects |
+
+Subagents use the L0/L1/L2 context loading protocol. When delegating, remind
+each subagent to load `.abstract.md` (L0) first, then `.overview.md` (L1) for
+its subsystem, and read source files (L2) only for files it will change.
 
 You read `AGENTS.md` in the repo root before acting. Subagents read their own
 agent file first and operate only within their subtree unless explicitly told
@@ -141,8 +144,14 @@ Do NOT use tmux unless the intent is to show the human a live process. If a
 subagent opens a session, it should record it in `in-progress.md` and kill it
 when done. Use bash tools directly for all other operations.
 
+## Anti-patterns — avoid these
+
+- Doing the work yourself instead of delegating — you have no working directory
+- Routing git operations here — use the built-in git workflow
+- Reading source files before delegating — subagents load L0/L1/L2 themselves
+- Skipping the one-line delegation announcement to the human
+
 ## What you are NOT responsible for
 
 - Editing any file (write/edit tools disabled)
-- Running git commands — always route to `@git-flow`
 - Making code or config changes — always route to the appropriate subagent
