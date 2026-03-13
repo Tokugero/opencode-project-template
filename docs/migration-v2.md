@@ -15,7 +15,7 @@ Estimated time: ~15 minutes for a project with 2–4 subsystems.
 | Component index | `<subsystem>/function_signature.md` | Merged into `.overview.md` component table |
 | Project map | _(none)_ | `.abstract.md` at project root |
 | Context-update skill | `signatures-update` | `context-update` |
-| OpenCode git agent | `git-flow` (global) | agency-agents (separate install) |
+| OpenCode git agent | `git-flow` (global) | [agency-agents](https://github.com/msitarzewski/agency-agents) (separate install) |
 
 ---
 

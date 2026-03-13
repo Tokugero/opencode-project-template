@@ -60,7 +60,7 @@ programs.opencode = {
 This directory ships no agents. Add your own project-specific agents here
 and follow the installation steps above to deploy them.
 
-**Git workflow** is handled by **agency-agents** — a companion tool deployed
-separately. Install agency-agents and deploy it to
-`~/.config/opencode/agents/`. See the agency-agents repository for
-installation instructions.
+**Git workflow** is handled by
+[**agency-agents**](https://github.com/msitarzewski/agency-agents) — a
+companion tool deployed separately. Install agency-agents and deploy it to
+`~/.config/opencode/agents/`.

@@ -112,8 +112,8 @@ These tools complement Claude Code but are deployed separately:
 
 | Tool | Purpose |
 |------|---------|
-| **agency-agents** | Global git workflow agent for OpenCode. Deploy to `~/.config/opencode/agents/`. See the agency-agents repository for installation. |
-| **impeccable** | Opinionated code quality enforcer. Runs as a pre-commit hook or CI step. See the impeccable repository for installation. |
+| [**agency-agents**](https://github.com/msitarzewski/agency-agents) | Global git workflow agent for OpenCode. Deploy to `~/.config/opencode/agents/`. |
+| [**impeccable**](https://github.com/pbakaus/impeccable) | Opinionated code quality enforcer. Runs as a pre-commit hook or CI step. |
 
 ---
 
@@ -128,7 +128,8 @@ The two-phase push protocol and conventional commits format are captured as
 global rules in `global-config/claudecode/CLAUDE.md`, loaded into every
 session automatically.
 
-For OpenCode, git workflow is handled by **agency-agents** (see Companion
+For OpenCode, git workflow is handled by
+[agency-agents](https://github.com/msitarzewski/agency-agents) (see Companion
 tools above).
 
 ### Skills vs. commands

@@ -51,7 +51,7 @@ contains parallel configuration for each tool.
 
 3. **Deploy global config once per machine** — see
    [`global-config/agents/README.md`](global-config/agents/README.md) for
-   OpenCode agent deployment and the agency-agents companion tool for git workflow.
+   OpenCode agent deployment and the [agency-agents](https://github.com/msitarzewski/agency-agents) companion tool for git workflow.
 
 ### Both tools
 
@@ -407,3 +407,15 @@ Report to the human:
      from `global-config/claudecode/README.md`
    - OpenCode: `ls ~/.config/opencode/agents/` — if no agents installed, point
      to `global-config/agents/README.md` and the agency-agents companion tool
+
+---
+
+## Acknowledgements
+
+This template builds on ideas and tools from the following projects:
+
+| Project | What we use from it |
+|---------|-------------------|
+| [**OpenViking**](https://github.com/volcengine/OpenViking) | L0/L1/L2 tiered context pattern — `.abstract.md` (L0), `.overview.md` (L1), source files (L2). On-demand hierarchical loading keeps agent context lean. |
+| [**agency-agents**](https://github.com/msitarzewski/agency-agents) | Git workflow agent for OpenCode. Replaces our former `git-flow` agent with a maintained, personality-driven agent suite. |
+| [**impeccable**](https://github.com/pbakaus/impeccable) | Design-quality enforcement commands (`/audit`, `/normalize`, `/polish`, `/distill`). Referenced as a companion tool in global-config. |
