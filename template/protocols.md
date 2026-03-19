@@ -90,6 +90,79 @@ workers — runs inside the correct Nix dev shell with all native libraries
 
 ---
 
+## Forgejo API
+
+Use this procedure whenever a skill or agent needs to interact with the Forgejo
+issue tracker. Follow these steps in order before making any API calls.
+
+### 1. Resolve credentials
+
+```bash
+FORGEJO_URL=$(grep -m1 '^FORGEJO_URL=' .env 2>/dev/null | cut -d= -f2-)
+FORGEJO_TOKEN=$(grep -m1 '^FORGEJO_TOKEN=' .env 2>/dev/null | cut -d= -f2-)
+# Fall back to secrets/ if .env is absent
+FORGEJO_URL=${FORGEJO_URL:-$(cat secrets/forgejo_url 2>/dev/null)}
+FORGEJO_TOKEN=${FORGEJO_TOKEN:-$(cat secrets/forgejo_token 2>/dev/null)}
+```
+
+If either `FORGEJO_URL` or `FORGEJO_TOKEN` is empty after both lookups, stop
+and ask the user to provide the missing values. Do not proceed with empty
+credentials.
+
+Secret files follow the project secrets convention:
+- `secrets/forgejo_url` — base URL, e.g. `https://forgejo.example.com`
+- `secrets/forgejo_token` — personal access token with `issues` scope
+
+### 2. Verify connectivity
+
+```bash
+curl -sf \
+  -H "Authorization: token $FORGEJO_TOKEN" \
+  "$FORGEJO_URL/api/v1/user" \
+  | grep -q '"login"'
+```
+
+If the check fails (non-zero exit or missing `"login"` field), report the HTTP
+error and stop. Do not attempt issue operations against an unreachable or
+unauthenticated instance.
+
+### 3. Resolve owner and repo
+
+Parse from the git remote (handles both HTTPS and SSH remotes):
+
+```bash
+REMOTE=$(git remote get-url origin)
+# HTTPS: https://forgejo.example.com/owner/repo.git
+# SSH:   git@forgejo.example.com:owner/repo.git
+OWNER=$(echo "$REMOTE" | sed 's|.*[/:]||;s|/.*||' | sed 's|\.git$||')
+REPO=$(echo "$REMOTE" | sed 's|.*/||;s|\.git$||')
+```
+
+Confirm the resolved `$OWNER/$REPO` looks correct before making write calls.
+
+### 4. API call patterns
+
+**Fetch an issue:**
+```bash
+curl -sf \
+  -H "Authorization: token $FORGEJO_TOKEN" \
+  "$FORGEJO_URL/api/v1/repos/$OWNER/$REPO/issues/$ISSUE_NUM"
+```
+
+**Create an issue:**
+```bash
+curl -sf -X POST \
+  -H "Authorization: token $FORGEJO_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$FORGEJO_URL/api/v1/repos/$OWNER/$REPO/issues" \
+  -d "$(jq -n --arg title "$TITLE" --arg body "$BODY" '{title: $title, body: $body}')"
+```
+
+The response includes `.html_url` — print it so the user can navigate to the
+created issue.
+
+---
+
 ## Helpful Commands
 
 ```sh

@@ -10,6 +10,18 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [2.1.0] — 2026-03-19
+
+### Added
+- `template/.claude/skills/grill-me/` — relentless design interview skill; resolves all decision branches before implementation begins
+- `template/.claude/skills/write-a-prd/` — converts a conversation into a structured PRD submitted as a Forgejo issue
+- `template/.claude/skills/prd-to-issues/` — breaks a PRD into vertical-slice Forgejo issues
+- `template/.claude/skills/tdd/` — strict red-green-refactor TDD cycle with explicit interface and behaviour confirmation gates
+- `template/.claude/skills/improve-codebase-architecture/` — read-only structural analysis for agent navigation and testability; findings feed into `/tdd` or `sdlc-audit Phase 6`
+- `template/protocols.md` — new `## Forgejo API` section: credential resolution, connectivity check, owner/repo parsing, and reusable fetch/create patterns; referenced by skills rather than duplicated
+
+---
+
 ## [2.0.0] — 2026-03-13
 
 ### Breaking
