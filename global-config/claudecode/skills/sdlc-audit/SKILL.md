@@ -218,8 +218,6 @@ given 15-22 findings each. Instead:
       - Instructions to commit each fix individually using a conventional commit:
         ```
         fix(scope): description
-
-        Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
         ```
       - Instructions to run the relevant test suite after all fixes in the
         batch are committed and to report pass/fail back to the lead.
