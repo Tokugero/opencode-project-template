@@ -10,6 +10,13 @@ tag and apply changes manually or with the help of the orchestrator agent.
 
 ---
 
+## [2.1.1] — 2026-03-23
+
+### Changed
+- `template/.claude/settings.json` — default model updated to `claude-opus-4-6[1m]`
+
+---
+
 ## [2.1.0] — 2026-03-19
 
 ### Added
